@@ -1,2 +1,6 @@
 # mypython
-Meine Python-Programme
+# Meine Python-Programme
+
+# WETTER
+#
+# Pythonprogramm zur Wettervorhersage
