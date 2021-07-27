@@ -337,7 +337,7 @@ def dateien(mod, daten, filename):
         'staat': 'Deutschland'}
     # Standardwerte für die Datei "einheiten.json"
     std_einheiten = {
-        'temp': 'Celsius (°C)',
+        'temp': '°C',
         'druck': 'Hekto Pascal (hPa)',
         'speed': 'm/s',
         'regen': 'mm',
