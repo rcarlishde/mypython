@@ -2,8 +2,8 @@
 """
 ********************************
 * Dateiname: einstellungen.py  *
-*   Version: 2.1               *
-*     Stand: 22.07.2021        *
+*   Version: 2.2               *
+*     Stand: 26.07.2021        *
 *     Autor: Richard Carl      *
 ********************************
 
@@ -29,12 +29,16 @@ import tkinter.font as tkFont  # Schriften selbst definieren
 import requests  # ermöglicht das Einlesen von Daten via API
 import datetime  # Datums- und Zeitberechnung
 # import json                     # Daten im Format JSON verarbeiten
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 # eigene Module
 from icons import *  # Liste der Wettericons erstellen und speichern
 
+
 # Farben bzw. Themes definieren
 # -----------------------------
-#
+# Vorbereitung für eine Steuerung der Farben
 # Standardwerte:
 std_color = '#d9d9d9'  # Hintergrundfarbe aller Elemente
 std_text_col = 'black'  # Schriftfarbe aller Elemente
@@ -384,8 +388,8 @@ def get_Wetterdaten(lat, lon, typ="onecall"):
             str(lon) + "&lang=de&appid=e9795e0ea062e5a6b848c34b35313cb8"
 
     # debugging
-    print('URL = ', url)
-    print('URL53 = ', url53)
+    # print('URL = ', url)
+    # print('URL53 = ', url53)
 
     # Daten lesen
     if typ == "onecall":
@@ -782,18 +786,78 @@ def tab_details(dat_onecall, daten_forecast, ort, einheiten, image_path):
     return
 
 
-def tab_diagramme():
+def tab_diagramme(lat, lon):
     # Erzeugung und Anzeige der Diagramme
     #
-    # Diagramm - Temperaturen
-    #               Temperatur
-    #               gefühlte Temp.
-    #               min-max-Temp.
-    # Diagramm - Luftdruck
-    # Diagramm - Windstärke
-    # Diagramm - Niederschlag (Regen/Schnee)
-    # Diagramm - Luftfeuchte
-    pass
+    # Themen der Diagramme:
+    # ---------------------
+    # Temperaturen
+    #   Temperatur
+    #   gefühlte Temp.
+    #   min-max-Temp.
+    # Luftdruck
+    # Windstärke
+    # Niederschlag (Regen/Schnee)
+    # Luftfeuchte
+    #
+    # Zeitabschnitte der Diagramme:
+    # -----------------------------
+    # eine Stunde   - Interval Minuten      # nur Niederschläge (precipitation)
+    # 48 Stunden    - Interval Stunden
+    # eine Woche    - Interval Tage
+    #
+    #
+    # Funktionen:
+    # -----------
+    def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte,
+                      yWerte1=0, yWerte2=0, leg1="", leg2=''):
+        # Stellt einen Plot bzw. ein Diagramm dar
+        # Es können 1 oder 2 Kurven gleichzeitig dargestellt werden
+        #
+        # Variablen:
+        # text_Titel    = Titel über dem Diagramm
+        # text_xAchse   = Beschriftung der X-Achse
+        # text_yAchse   = Beschriftung der Y-Achse
+        # xWerte        = Werte und Aufteilung der X-Achse
+        # yWerte1       = Werte und Aufteilung der y-Achse Gruppe1
+        # yWerte2       = Werte und Aufteilung der y-Achse Gruppe2
+        # leg1          = Bezeichnung der Gruppe 1 in der Legende
+        # leg2          = Bezeichnung der Gruppe 2 in der Legende
+        #
+        plt.clf()
+        plt.rcParams["figure.figsize"] = (7.4, 6)      TA # Größe des Plots
+        figTemp = plt.figure()
+        canvas = FigureCanvasTkAgg(figTemp, master=f3)  # TAB Diagramme auswählen
+        canvas.get_tk_widget().place(x=15, y=20)        # Position des Plots im TAB
+
+        plt.title(text_Titel)
+        plt.ylabel(text_yAchse)
+        plt.xlabel(text_xAchse)
+        plt.grid(True)
+        if yWerte1 != 0:
+            plt.plot(xWerte, yWerte1, color='b', linestyle='-', marker='o', label=leg1)
+        if yWerte2 != 0:
+            plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='o', label=leg2)
+        if yWerte1 != 0 and yWerte2 != 0:
+            plt.legend(loc='best')          # Position der Legende automatisch festlegen
+        return
+
+
+    # Vollständige Daten aus "onecall" lesen
+    url = "https://api.openweathermap.org/data/2.5/onecall?lat=" + \
+          str(lat) + "&lon=" \
+          + str(lon) + "&lang=de&appid=e9795e0ea062e5a6b848c34b35313cb8"
+    r = requests.get(url)
+    daten = r.json()
+    #print("Volldaten = \n", daten)          # debugging
+
+    xWerte = [1,2,3,4,5,6]
+    yWerte1 = [1.7, 2.9, 2.3, 2.7, 4.75, 3.7]
+    yWerte2 = [2.3, 3.3, 1.7, 2.5, 5.0, 4.1]
+
+    diagramm_show('Titel','X-Achse', 'Y-Achse', xWerte, yWerte1, yWerte2, 'wert1', 'wert2')
+
+    return
 
 
 # Start Hauptprogramm
@@ -927,7 +991,7 @@ tab_vorhersage(dat_forecast, einheiten, icon_path)
 tab_details(dat_onecall, dat_forecast, orte, einheiten, icon_path)
 
 # TAB Diagramme füllen
-tab_diagramme()
+tab_diagramme(orte['lat'], orte['lon'])
 
 tick()  # Uhr Ticker
 gui_wetter.mainloop()
