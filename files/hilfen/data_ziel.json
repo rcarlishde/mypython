@@ -1,0 +1,9 @@
+{
+    "ID": 2,
+    "Vorname": "Tanja",
+    "Nmane": "Testfrau",
+    "Telefon": {
+        "Mobil": "+49 345 678 91",
+        "Festnetz": "+49 234 567 89"
+    }
+}

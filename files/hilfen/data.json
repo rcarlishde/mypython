@@ -1,0 +1,29 @@
+[
+    {
+    "ID": 1,
+    "Vorname": "Max",
+    "Nmane": "Mustermann",
+    "Telefon": {
+        "Mobil": "+49 123 4546 78",
+        "Festnetz": "+49 987 654 32"
+        }
+    },
+    {
+        "ID": 2,
+        "Vorname": "Tanja",
+        "Nmane": "Testfrau",
+        "Telefon": {
+            "Mobil": "+49 345 678 91",
+            "Festnetz": "+49 234 567 89"
+        }
+    },
+    {
+        "ID": 3,
+        "Vorname": "Detlev",
+        "Nmane": "Dummyuser",
+        "Telefon": {
+            "Mobil": "+49 560 345 12",
+            "Festnetz": "+49 560026"
+        }
+    }
+]

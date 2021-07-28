@@ -1,0 +1,72 @@
+                          Wetterbericht - Einstellungen
+                          =============================
+
+  Hier können Sie folgende Einstellungen für das Programm "Wetterbericht" vornehmen:
+
+  TAB Ort
+  -------
+  Anzeige des ausgewählten Orts mit Angabe der automatisch ermittelten Breiten- und
+  Längengrads, der zugehörigen Zeitzone sowie der Höhe über NN.
+
+  TAB Ortswahl
+  ------------
+  - Auswahl eines Ortes für den die Wetterberichte angezeigt werden sollen
+      a) entweder durch Eingabe eines Ortsnamens (z.B. "Berlin")
+      b) oder durch die Eingabe einer Postleitzahl
+
+  - Auswahl eines Ländercodes - nicht zwingend nötig. Standard ist "DE" für Deutschland
+
+  - Nach einem Klick auf "suchen" oder der Taste "Enter" werden alle gefundenen
+    Orte aufgelistet.
+
+  - Aus dieser Liste den gewünschten Ort auswählen
+    (Doppelklick oder Einfachklick + Taste "Enter")
+
+  TAB Einheiten
+  -------------
+  Hier können Sie die Einheiten für die verschiedenen meteorologischen Größen selbst
+  bestimmen. Für folgende Größen können Sie Einheiten aus Vorgaben auswählen:
+
+  >  Temperaturen  --> °Celsius, °Kelvin, °Fahrenheit
+  >  Luftdruck     --> Hektopaskal (hPa), Torr
+  >  Windgeschwind.--> km/h, m/s, Stärke 0-12
+  >  Niederschläge --> mm/m², ltr/m²
+  >  Höhe          --> m über NN (fix)
+  >  Feuchte       --> % (fix)
+  >  Bewölkung     --> % (fix)
+  >  UV-Index      --> 1 - 12+ (fix)
+
+  TAB Aussehen
+  ------------
+  Hier können Sie das Erscheinungsbild des Programms ändern.
+
+  Hinweise zu den Quellen:
+  ------------------------
+  >  Die Koordinaten des Vorhersageorts werden von OpenStreetMap geholt und verarbeitet:
+     Manuell    : https://nominatim.openstreetmap.org/ui/search.html
+     Automatisch: https://nominatim.openstreetmap.org/search/Neuss?format=json
+     Der Ort, hier "Neuss", kann durch andere Orte beliebig ersetzt werden.
+
+  >  Die Liste der Ländercodes nach ISO 3166, Alpha-2 (Stand Mai 2020) stammt aus:
+     https://stefangabos.github.io/world_countries/
+     Die Liste kann nicht automatisch aktualisiert werden. Dies muss manuell auf der
+     verlinkten Seite erfolgen. Sie muss im Format "JSON" vorliegen und sollte alle
+     Staaten enthalten ("World")
+
+  >  Die Wetterdaten stammen von OpenStreetMap:
+     https://openweathermap.org/api
+     Hier stehen mehrere Tarife zur Auswahl. Die folgenden 2 Tarife habe ich ausgesucht:
+     # ONE CALL API
+       https://api.openweathermap.org/data/2.5/onecall?lat=51.2&lon=6.68&lang=de&appid=x
+     # 5 DAY / 3 HOUR FORECAST
+       https://api.openweathermap.org/data/2.5/forecast?lat=51.2&lon=6.68&lang=de&appid=x
+     Die Angabe &appid muss einen Code enthalten, den man bei der Registrierung auf der
+     Webseite kostenlos erhalten kann.
+
+  >  Die hier verwendeten Icons stammen von:
+     Meteorologisk Institutt (Norwegen)
+     Format Json)
+
+  Version: 2.2
+    Stand: 22.07.2021
+    Autor: Richard Carl

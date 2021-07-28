@@ -1,0 +1,88 @@
+# url: "https://api.openweathermap.org/data/2.5/onecall?lat=51.2&lon=6.68&lang=de&units=metric&appid=e9795e0ea062e5a6b848c34b35313cb8"
+	
+lat:				51.2
+lon:				6.68
+timezone:			"Europe/Berlin"
+timezone_offset :	7200
+
+current:	
+	dt				1622018571
+	sunrise			1621999732
+	sunset			1622057528
+	temp			11.66
+	feels_like		10.79
+	pressure		1012
+	humidity		73
+	dew_point		6.99
+	uvi				3.29
+	clouds			40
+	visibility		10000
+	wind_speed		1.34
+	wind_deg		248
+	wind_gust		1.79
+
+	weather:	
+		0:	
+			id			802
+			main		"Clouds"
+			description	"Mäßig bewölkt"
+			icon		"03d"
+
+minutely	[…]
+hourly	[…]
+
+daily:	
+	0:	
+		dt				1622026800
+		sunrise			1621999732
+		sunset			1622057528
+		moonrise		1622058900
+		moonset			1621999620
+		moon_phase		0.5
+
+		temp:	
+			day			11.39
+			min			6.83
+			max			13.03
+			night		9.45
+			eve			11.96
+			morn		8.38
+		
+		feels_like:	
+			day			10.54
+			night		7.1
+			eve			11.27
+			morn		6.27
+		
+		pressure		1012
+		humidity		75
+		dew_point		7.12
+		wind_speed		6.59
+		wind_deg		271
+		wind_gust		11.72
+		
+		weather:	
+			0:	
+				id			500
+				main		"Rain"
+				description	"Leichter Regen"
+				icon		"10d"
+				
+			clouds		64
+			pop			1
+			rain		3.23
+			uvi			3.29
+1	{…}
+	{…}
+7	{…}
+
+alerts:	
+	0:	
+		sender_name		"Deutscher Wetterdienst"
+		event			"wind gusts"
+		start			1622030400
+		end				1622052000
+		description		"There is a risk of wind gusts (level 1 of 4).\nOccurrence: near showers; Max. gusts: < 60 km/h; Wind direction: south-west then west"
+		tags:
+			0	"Wind"
+			1	"Wind"

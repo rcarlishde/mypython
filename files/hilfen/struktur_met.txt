@@ -1,0 +1,95 @@
+	
+type:									"Feature"
+geometry	
+	type:								"Point"
+	coordinates	:
+		0								6.68
+		1								51.2
+		2								43
+properties	:
+	meta:	
+		updated_at						"2021-05-26T01:04:40Z"
+		units:	
+			air_pressure_at_sea_level	"hPa"
+			air_temperature				"celsius"
+			air_temperature_max			"celsius"
+			air_temperature_min			"celsius"
+			cloud_area_fraction			"%"
+			cloud_area_fraction_high	"%"
+			cloud_area_fraction_low		"%"
+			cloud_area_fraction_medium	"%"
+			dew_point_temperature		"celsius"
+			fog_area_fraction			"%"
+			precipitation_amount		"mm"
+			relative_humidity			"%"
+			ultraviolet_index_clear_sky	"1"
+			wind_from_direction			"degrees"
+			wind_speed					"m/s"
+timeseries:	
+	 0:
+		time									"2021-05-26T06:00:00Z"
+		data:	
+			instant:	
+				details	:
+					air_pressure_at_sea_level	1012.3
+					air_temperature				9.3
+					cloud_area_fraction			95.3
+					cloud_area_fraction_high	0
+					cloud_area_fraction_low		94.5
+					cloud_area_fraction_medium	28.9
+					dew_point_temperature		6.9
+					fog_area_fraction			0
+					relative_humidity			85.8
+					ultraviolet_index_clear_sky	0.7
+					wind_from_direction			201.8
+					wind_speed					2.7
+				next_12_hours:	
+					summary:	
+						symbol_code				"lightrainshowers_day"
+				next_1_hours:	
+					summary	:
+						symbol_code				"partlycloudy_day"
+					details	:
+						precipitation_amount	0.1
+				next_6_hours:	
+					summary	:
+						symbol_code				"lightrain"
+					details:
+						air_temperature_max		13.4
+						air_temperature_min		10.1
+						precipitation_amount	0.5
+
+usw. ..............................................................................
+
+
+	 0:	time	"2021-05-26T06:00:00Z"		# Tag 1 	ab hier immer +1h
+	 1:	time	"2021-05-26T07:00:00Z"					
+	 .......
+
+	 6:	time	"2021-05-26T12:00:00Z"
+	12:	time	"2021-05-26T18:00:00Z"
+	18:	time	"2021-05-27T00:00:00Z"		# Tag 2
+	24:	time	"2021-05-27T06:00:00Z"
+	30:	time	"2021-05-27T12:00:00Z"
+	36:	time	"2021-05-27T18:00:00Z"
+	42:	time	"2021-05-28T00:00:00Z"		# Tag 3
+	48:	time	"2021-05-28T06:00:00Z"
+	54:	time	"2021-05-28T12:00:00Z"
+	........
+
+	60:	time	"2021-05-28T18:00:00Z"		# ab hier immer +6h
+	61:	time	"2021-05-29T00:00:00Z"		# Tag 4
+	62: time	"2021-05-29T06:00:00Z"
+	63: time	"2021-05-29T12:00:00Z"
+	64:	time	"2021-05-29T18:00:00Z"
+	65:	time	"2021-05-30T00:00:00Z"		# Tag 5
+	........
+
+	69:	time	"2021-05-31T00:00:00Z"		# Tag 6
+	73:	time	"2021-06-01T00:00:00Z"		# Tag 7
+	77:	time	"2021-06-02T00:00:00Z"		# Tag 8
+	81:	time	"2021-06-03T00:00:00Z"		# Tag 9
+	85:	time	"2021-06-04T00:00:00Z"		# Tag 10
+
+	86: time	"2021-06-04T06:00:00Z"
+
