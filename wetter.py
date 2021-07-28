@@ -825,30 +825,78 @@ def tab_diagramme(lat, lon):
         # leg2          = Bezeichnung der Gruppe 2 in der Legende
         #
         plt.clf()
-        plt.rcParams["figure.figsize"] = (7.4, 6)      TA # Größe des Plots
+        plt.rcParams["figure.figsize"] = (7.4, 6)       # Größe des Plots
         figTemp = plt.figure()
         canvas = FigureCanvasTkAgg(figTemp, master=f3)  # TAB Diagramme auswählen
         canvas.get_tk_widget().place(x=15, y=20)        # Position des Plots im TAB
-
+        # Beschriftung der Achsen und des Fensters
         plt.title(text_Titel)
         plt.ylabel(text_yAchse)
         plt.xlabel(text_xAchse)
-        plt.grid(True)
+        plt.grid(True)                                  # Gitternetz ein
         if yWerte1 != 0:
             plt.plot(xWerte, yWerte1, color='b', linestyle='-', marker='o', label=leg1)
         if yWerte2 != 0:
             plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='o', label=leg2)
         if yWerte1 != 0 and yWerte2 != 0:
             plt.legend(loc='best')          # Position der Legende automatisch festlegen
+
+        size = 10
+        width = 12
+
+        # Labels
+        zeit_label0 = tk.Label(f3, text="Intervalle:", font=(font_name,14,'bold'),
+                               width=width, anchor=E)
+        zeit_label1 = tk.Label(f3, text="48 Stunden:", font=(font_name, size), width=width, anchor=E)
+        zeit_label2 = tk.Label(f3, text="5 Tage:", font=(font_name, size), width=width, anchor=E)
+
+        # Button zur Steuerung der Diagramme
+
+        dbutton1 = tk.Button(f3, text="Niederschlag", font=(font_name, size), width=width)
+        dbutton2 = tk.Button(f3, text="Temperatur", font=(font_name, size), width=width)
+        dbutton3 = tk.Button(f3, text="Temperatur", font=(font_name, size), width=width)
+        dbutton4 = tk.Button(f3, text="gefühlte Temp.", font=(font_name, size), width=width)
+        dbutton5 = tk.Button(f3, text="gefühlte Temp.", font=(font_name, size), width=width)
+        dbutton6 = tk.Button(f3, text="min-max Temp.", font=(font_name, size), width=width)
+        dbutton7 = tk.Button(f3, text="min-max Temp.", font=(font_name, size), width=width)
+
+        ystart = 630
+        ystep = 35
+        xstart = 15
+        xstep = 125
+
+        zeit_label0.place(x=0, y=ystart)
+        zeit_label1.place(x=15, y=ystart+ystep)
+        zeit_label2.place(x=15, y=ystart+2*ystep)
+
+
+        dbutton1.place(x=xstart+xstep, y=ystart+3*ystep)
+        dbutton2.place(x=xstart+xstep, y=ystart+ystep)
+        dbutton3.place(x=xstart+xstep, y=ystart+2*ystep)
+        dbutton4.place(x=xstart+2*xstep, y=ystart+ystep)
+        dbutton5.place(x=xstart+2*xstep, y=ystart+2*ystep)
+        dbutton6.place(x=xstart+3*xstep, y=ystart+ystep)
+        dbutton7.place(x=xstart+3*xstep, y=ystart+2*ystep)
+
+
+
+
+
+
         return
 
+    def daten_lesen(lat, lon):
+        # Vollständige Daten aus "onecall" lesen
+        url = "https://api.openweathermap.org/data/2.5/onecall?lat=" + \
+              str(lat) + "&lon=" \
+              + str(lon) + "&lang=de&appid=e9795e0ea062e5a6b848c34b35313cb8"
+        r = requests.get(url)
+        return r.json()
 
-    # Vollständige Daten aus "onecall" lesen
-    url = "https://api.openweathermap.org/data/2.5/onecall?lat=" + \
-          str(lat) + "&lon=" \
-          + str(lon) + "&lang=de&appid=e9795e0ea062e5a6b848c34b35313cb8"
-    r = requests.get(url)
-    daten = r.json()
+    def minutely():
+        # Darstellung der Niederschläge der nächsten Stunde
+        pass
+
     #print("Volldaten = \n", daten)          # debugging
 
     xWerte = [1,2,3,4,5,6]
