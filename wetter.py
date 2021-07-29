@@ -28,6 +28,7 @@ import tkinter.ttk as ttk  # Tabs für die GUI
 import tkinter.font as tkFont  # Schriften selbst definieren
 import requests  # ermöglicht das Einlesen von Daten via API
 import datetime  # Datums- und Zeitberechnung
+#from datetime import time
 # import json                     # Daten im Format JSON verarbeiten
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -807,6 +808,7 @@ def tab_diagramme(lat, lon):
     # eine Woche    - Interval Tage
     #
     diagram_type = StringVar()  # Werte-Rückgabe der Radiobuttons
+    #
     # Funktionen:
     # -----------
     def daten_lesen(lat, lon):
@@ -817,18 +819,59 @@ def tab_diagramme(lat, lon):
         r = requests.get(url)
         return r.json()
 
-    def diagram_wahl():
-        print(diagram_type.get())
-        wahl = diagram_type.get()
-        if wahl == "niederschlag":
-            xWerte = [1, 2, 3, 4, 5, 6]
-            yWerte1 = [1.7, 2.9, 2.3, 2.7, 4.75, 3.7]
-            yWerte2 = [2.3, 3.3, 1.7, 2.5, 5.0, 4.1]
-            diagramm_show('Titel','X-Achse', 'Y-Achse', xWerte, yWerte1, yWerte2, 'wert1', 'wert2')
+
+    def dia_minutely():
+        # Plotten von Niederschlag in der nächsten Stunde
+        #
+        # Variablen:
+        # nsdaten   = Niederschlagsdaten aus dem Web
+        # zeit_h    = Hilfvariable zur Ermittlung aktuellen Zeit
+        # zeit      = aktuelle Zeit als String
+        # titel     = Titel des Plots
+        # yWerte    = Niederschlagswerte
+        # xWerte    = Minuten auf der x-Achse
+        # zähler    = Anzahl der yWerte
+        #
+        # Daten aus dem Web lesen
+        nsdaten = daten_lesen(lat, lon)
+        # Startzeit des Grafen ermitteln
+        zeit_h = datetime.datetime.fromtimestamp(nsdaten['minutely'][0]['dt'])
+        # falls Minuten kleiner 10 eine führende 0 hinzufügen
+        if zeit_h.minute < 10:
+            zeit = str(zeit_h.hour) + ":0" + str(zeit_h.minute)
+        else:
+            zeit = str(zeit_h.hour) + ":" + str(zeit_h.minute)
+
+        # Titel für das Diagramm
+        titel = "Niederschlag in der nächsten Stunde   (Start um " + zeit + " Uhr)"
+        xWerte, yWerte = [], []                     # Wertelisten initialisieren
+
+        # Daten in Liste übernehmen
+        zähler = 0                                  # reset Zähler
+        # Werte noch umrechnen in % ??????????????????????????????????????????
+        for wert in nsdaten['minutely']:
+            yWerte.append(wert['precipitation'])
+            xWerte.append(zähler)
+            zähler += 1
+        diagramm_show(titel, 'Minuten', 'Niederschlag in %', xWerte, yWerte, "h")
         return
 
+
+    def diagram_wahl():
+        # Auswertung der Auswahl der Diagramme per Radiobutton
+        #
+        # Variablen:
+        # wahl = String der Auswahl per Radiobutton
+        #
+        wahl = diagram_type.get()       # Auswahlstring lesen
+        print("Wahl = ", wahl)
+        if wahl == "niederschlag":
+            dia_minutely()              # Plot von Niederschlag in der nächsten Stunde
+        return
+
+
     def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte,
-                      yWerte1=0, yWerte2=0, leg1="", leg2=''):
+                      yWerte1=0, leg1="", yWerte2=0, leg2=''):
         # Stellt einen Plot bzw. ein Diagramm dar
         # Es können 1 oder 2 Kurven gleichzeitig dargestellt werden
         #
@@ -853,14 +896,16 @@ def tab_diagramme(lat, lon):
         plt.xlabel(text_xAchse)
         plt.grid(True)                      # Gitternetz ein
         # Plot ausgeben
-        if yWerte1 != 0:                    # Ausgabe des 1.Grafen
-            plt.plot(xWerte, yWerte1, color='b', linestyle='-', marker='o', label=leg1)
-        if yWerte2 != 0:                    # Ausgabe des 2.Grafen
-            plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='o', label=leg2)
-        if yWerte1 != 0 and yWerte2 != 0:   # Legende nur bei 2 Grafen anzeigen
-            plt.legend(loc='best')          # Position der Legende automatisch festlegen
+        if leg1 == "h":                         # gilt nur für Niederschlag 1 Stunde
+            plt.plot(xWerte, yWerte1, color='b', linestyle='-')
+        else:
+            if yWerte1 != 0:                    # Ausgabe des 1.Grafen
+                plt.plot(xWerte, yWerte1, color='b', linestyle='-', marker='o', label=leg1)
+            if yWerte2 != 0:                    # Ausgabe des 2.Grafen
+                plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='o', label=leg2)
+            if yWerte1 != 0 and yWerte2 != 0:   # Legende nur bei 2 Grafen anzeigen
+                plt.legend(loc='best')          # Position der Legende automatisch festlegen
         return
-
 
 
     # Radiobutton für die Diagrammauswahl einrichten
