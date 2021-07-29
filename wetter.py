@@ -806,9 +806,27 @@ def tab_diagramme(lat, lon):
     # 48 Stunden    - Interval Stunden
     # eine Woche    - Interval Tage
     #
-    #
+    diagram_type = StringVar()  # Werte-Rückgabe der Radiobuttons
     # Funktionen:
     # -----------
+    def daten_lesen(lat, lon):
+        # Vollständige Daten aus "onecall" lesen
+        url = "https://api.openweathermap.org/data/2.5/onecall?lat=" + \
+              str(lat) + "&lon=" \
+              + str(lon) + "&lang=de&appid=e9795e0ea062e5a6b848c34b35313cb8"
+        r = requests.get(url)
+        return r.json()
+
+    def diagram_wahl():
+        print(diagram_type.get())
+        wahl = diagram_type.get()
+        if wahl == "niederschlag":
+            xWerte = [1, 2, 3, 4, 5, 6]
+            yWerte1 = [1.7, 2.9, 2.3, 2.7, 4.75, 3.7]
+            yWerte2 = [2.3, 3.3, 1.7, 2.5, 5.0, 4.1]
+            diagramm_show('Titel','X-Achse', 'Y-Achse', xWerte, yWerte1, yWerte2, 'wert1', 'wert2')
+        return
+
     def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte,
                       yWerte1=0, yWerte2=0, leg1="", leg2=''):
         # Stellt einen Plot bzw. ein Diagramm dar
@@ -829,82 +847,60 @@ def tab_diagramme(lat, lon):
         figTemp = plt.figure()
         canvas = FigureCanvasTkAgg(figTemp, master=f3)  # TAB Diagramme auswählen
         canvas.get_tk_widget().place(x=15, y=20)        # Position des Plots im TAB
-        # Beschriftung der Achsen und des Fensters
+        # Beschriftung der Achsen und des Plotfensters
         plt.title(text_Titel)
         plt.ylabel(text_yAchse)
         plt.xlabel(text_xAchse)
-        plt.grid(True)                                  # Gitternetz ein
-        if yWerte1 != 0:
+        plt.grid(True)                      # Gitternetz ein
+        # Plot ausgeben
+        if yWerte1 != 0:                    # Ausgabe des 1.Grafen
             plt.plot(xWerte, yWerte1, color='b', linestyle='-', marker='o', label=leg1)
-        if yWerte2 != 0:
+        if yWerte2 != 0:                    # Ausgabe des 2.Grafen
             plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='o', label=leg2)
-        if yWerte1 != 0 and yWerte2 != 0:
+        if yWerte1 != 0 and yWerte2 != 0:   # Legende nur bei 2 Grafen anzeigen
             plt.legend(loc='best')          # Position der Legende automatisch festlegen
-
-        size = 10
-        width = 12
-
-        # Labels
-        zeit_label0 = tk.Label(f3, text="Intervalle:", font=(font_name,14,'bold'),
-                               width=width, anchor=E)
-        zeit_label1 = tk.Label(f3, text="48 Stunden:", font=(font_name, size), width=width, anchor=E)
-        zeit_label2 = tk.Label(f3, text="5 Tage:", font=(font_name, size), width=width, anchor=E)
-
-        # Button zur Steuerung der Diagramme
-
-        dbutton1 = tk.Button(f3, text="Niederschlag", font=(font_name, size), width=width)
-        dbutton2 = tk.Button(f3, text="Temperatur", font=(font_name, size), width=width)
-        dbutton3 = tk.Button(f3, text="Temperatur", font=(font_name, size), width=width)
-        dbutton4 = tk.Button(f3, text="gefühlte Temp.", font=(font_name, size), width=width)
-        dbutton5 = tk.Button(f3, text="gefühlte Temp.", font=(font_name, size), width=width)
-        dbutton6 = tk.Button(f3, text="min-max Temp.", font=(font_name, size), width=width)
-        dbutton7 = tk.Button(f3, text="min-max Temp.", font=(font_name, size), width=width)
-
-        ystart = 630
-        ystep = 35
-        xstart = 15
-        xstep = 125
-
-        zeit_label0.place(x=0, y=ystart)
-        zeit_label1.place(x=15, y=ystart+ystep)
-        zeit_label2.place(x=15, y=ystart+2*ystep)
-
-
-        dbutton1.place(x=xstart+xstep, y=ystart+3*ystep)
-        dbutton2.place(x=xstart+xstep, y=ystart+ystep)
-        dbutton3.place(x=xstart+xstep, y=ystart+2*ystep)
-        dbutton4.place(x=xstart+2*xstep, y=ystart+ystep)
-        dbutton5.place(x=xstart+2*xstep, y=ystart+2*ystep)
-        dbutton6.place(x=xstart+3*xstep, y=ystart+ystep)
-        dbutton7.place(x=xstart+3*xstep, y=ystart+2*ystep)
-
-
-
-
-
-
         return
 
-    def daten_lesen(lat, lon):
-        # Vollständige Daten aus "onecall" lesen
-        url = "https://api.openweathermap.org/data/2.5/onecall?lat=" + \
-              str(lat) + "&lon=" \
-              + str(lon) + "&lang=de&appid=e9795e0ea062e5a6b848c34b35313cb8"
-        r = requests.get(url)
-        return r.json()
 
-    def minutely():
-        # Darstellung der Niederschläge der nächsten Stunde
-        pass
 
-    #print("Volldaten = \n", daten)          # debugging
+    # Radiobutton für die Diagrammauswahl einrichten
+    size = 10                           # Schriftgröße
+    width = 11                          # Breite der Buttons
 
-    xWerte = [1,2,3,4,5,6]
-    yWerte1 = [1.7, 2.9, 2.3, 2.7, 4.75, 3.7]
-    yWerte2 = [2.3, 3.3, 1.7, 2.5, 5.0, 4.1]
+    # Beschriftung des Bereichs für die Radiobuttons
+    tk.Label(f3, text="Intervalle:", font=(font_name, 14, 'bold'),
+             width=width).place(x=0, y=630)
+    tk.Label(f3, text="48 Stunden:", font=(font_name, size),
+             width=width, anchor=E).place(x=10, y=675)
+    tk.Label(f3, text="5 Tage:", font=(font_name, size), width=width,
+             anchor=E).place(x=10, y=710)
 
-    diagramm_show('Titel','X-Achse', 'Y-Achse', xWerte, yWerte1, yWerte2, 'wert1', 'wert2')
+    # Liste der Radiobutton-Parameter
+    # rbp = [text, value, width, x-koord, ykoord]
+    rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, 745],
+           ["Temperatur", "temp48", 11, 110, 675],
+           ["Temperatur", "temp5", 11, 110, 710],
+           ["gef. Temp.", "gtemp48", 11, 203, 675],
+           ["gef. Temp.", "gtemp5", 11, 203, 710],
+           ["min-max Temp.", "mmtemp58", 14, 296, 675],
+           ["min-max Temp.", "mmtemp5", 14, 296, 710],
+           ["Luftdruck", "luft48", 10, 413, 675],
+           ["Luftdruck", "luft5", 10, 413, 710],
+           ["Luftfeuchte", "luftf48", 11, 498, 675],
+           ["Luftfeuchte", "luftf5", 11, 498, 710],
+           ["Wind", "wind48", 6, 591, 675],
+           ["Wind", "wind5", 6, 591, 710],
+           ["Niederschlag", "nieder48", 13, 645, 675],
+           ["Niederschlag", "nieder5", 13, 645, 710]]
 
+    # Radiobuttons für die Diagrammauswahl einrichten + platzieren
+    for x in range(0,15):
+        Radiobutton(f3, text=rbp[x][0], value=rbp[x][1], indicatoron=0,
+                        font=(font_name, size), width=rbp[x][2], height=1,
+                        variable=diagram_type, command=diagram_wahl)\
+                    .place(x=rbp[x][3], y=rbp[x][4])
+    diagram_type.set("niederschlag")
+    diagram_wahl()
     return
 
 
