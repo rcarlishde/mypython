@@ -28,7 +28,7 @@ import tkinter.ttk as ttk  # Tabs für die GUI
 import tkinter.font as tkFont  # Schriften selbst definieren
 import requests  # ermöglicht das Einlesen von Daten via API
 import datetime  # Datums- und Zeitberechnung
-#from datetime import time
+# from datetime import time
 # import json                     # Daten im Format JSON verarbeiten
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -48,7 +48,7 @@ std_white = 'white'  # Hintergrund der Tooltipps
 # Alle Hintergrundfarben
 col_lab_kopf = std_color  # Logo im Hauptfenster
 col_gui_wetter = std_color  # Hauptfenster
-col_lab_kopf123 = std_color  # Labels der Überschiften im Hauptfenster
+col_lab_kopf123 = std_color  # Labels der Überschriften im Hauptfenster
 col_f1 = std_color  # die einzelnen Seiten des Notebooks
 col_f2 = std_color
 col_f3 = std_color
@@ -58,7 +58,7 @@ col_tab = std_color  # die TABs im Notebook
 col_tooltip_bg = std_white  # Tooltipps
 col_ueber = std_white  # Überschriften in Vorhersage
 col_cell = std_color  # alle Zellen der Vorhersage
-col_cell_logo = std_color  # Logohintergrund in allen Zellen der Vorhersage
+col_cell_logo = std_color  # Logo-Hintergrund in allen Zellen der Vorhersage
 col_alarm = std_color  # Alarmmeldung
 col_alarm_icon = std_color  # Alarm-Icon
 col_detail_ort = std_color  # TAB Detail Ortsdaten
@@ -150,26 +150,33 @@ def plus_unit(wert, unit):
     wert = "{:.0f}".format(wert)
     return wert + " " + unit
 
-
-def umrechnen_druck(druck, unitDruck):
+def umrechnen_druck(druck, unitDruck, numeral=False):
     # Umrechnen des Luftdrucks passend zu den eingestellten Einheiten
     # Basis ist hPa
 
     if unitDruck == 'mmHG':
         druck = druck * 0.75006375541921
     druck = "{:.2f}".format(druck)
-    return druck + " " + unitDruck
+    if numeral == False:
+        return druck + " " + unitDruck
+    else:
+        return float(druck)
 
 
-def umrechnen_temp(temp, unitTemp):
+def umrechnen_temp(temp, unitTemp, numeral=False):
     # Umrechnen der Temperaturwerte passend zu den eingestellten Einheiten
+    # numeral   = True => Wert als float, False => als String mit Einheit
     # Basis ist °Kelvin
     if unitTemp == '°C':
         temp = temp - 273.15
     elif unitTemp == '°F':
         temp = ((temp - 273.15) * 9 / 5) + 32
+    temp = round(temp, 1)
     temp = "{:.1f}".format(temp)
-    return temp + " " + unitTemp
+    if numeral == False:
+        return str(temp) + " " + unitTemp
+    else:
+        return float(temp)
 
 
 def umrechnen_wind(wind, unitWind):
@@ -787,7 +794,7 @@ def tab_details(dat_onecall, daten_forecast, ort, einheiten, image_path):
     return
 
 
-def tab_diagramme(lat, lon):
+def tab_diagramme(lat, lon, einheiten):
     # Erzeugung und Anzeige der Diagramme
     #
     # Themen der Diagramme:
@@ -807,10 +814,11 @@ def tab_diagramme(lat, lon):
     # 48 Stunden    - Interval Stunden
     # eine Woche    - Interval Tage
     #
-    diagram_type = StringVar()  # Werte-Rückgabe der Radiobuttons
+    diagram_type = StringVar()  # Variable für die Werte-Rückgabe der Radiobuttons
     #
     # Funktionen:
     # -----------
+
     def daten_lesen(lat, lon):
         # Vollständige Daten aus "onecall" lesen
         url = "https://api.openweathermap.org/data/2.5/onecall?lat=" + \
@@ -820,58 +828,251 @@ def tab_diagramme(lat, lon):
         return r.json()
 
 
-    def dia_minutely():
-        # Plotten von Niederschlag in der nächsten Stunde
+    def diagram_wahl():
+        # Auswertung der Auswahl der Diagramme per Radiobutton
         #
         # Variablen:
+        # wahl = String der Auswahl per Radiobutton
         # nsdaten   = Niederschlagsdaten aus dem Web
-        # zeit_h    = Hilfvariable zur Ermittlung aktuellen Zeit
+        # zeit_h    = Hilfsvariable zur Ermittlung aktuellen Zeit
         # zeit      = aktuelle Zeit als String
         # titel     = Titel des Plots
         # yWerte    = Niederschlagswerte
         # xWerte    = Minuten auf der x-Achse
         # zähler    = Anzahl der yWerte
-        #
-        # Daten aus dem Web lesen
-        nsdaten = daten_lesen(lat, lon)
+
+
+        wahl = diagram_type.get()               # Auswahlstring lesen
+
+        nsdaten = daten_lesen(lat, lon)         # Webdaten lesen
+        xWerte, yWerte, yWerte2 = [], [], []    # x-y Listen init
+        titel = ""                              # Diagrammtitel init
+        xtitel, ytitel = "", ""                 # Titel der x- und Y-Achse
+        leg1, leg2 = "", ""                     # Legendentext init
+        einh = ""                               # Einheiten für Diagramm
+
         # Startzeit des Grafen ermitteln
-        zeit_h = datetime.datetime.fromtimestamp(nsdaten['minutely'][0]['dt'])
+        zeit_h = datetime.datetime.fromtimestamp(nsdaten['hourly'][0]['dt'])
         # falls Minuten kleiner 10 eine führende 0 hinzufügen
         if zeit_h.minute < 10:
             zeit = str(zeit_h.hour) + ":0" + str(zeit_h.minute)
         else:
             zeit = str(zeit_h.hour) + ":" + str(zeit_h.minute)
 
-        # Titel für das Diagramm
-        titel = "Niederschlag in der nächsten Stunde   (Start um " + zeit + " Uhr)"
-        xWerte, yWerte = [], []                     # Wertelisten initialisieren
-
-        # Daten in Liste übernehmen
-        zähler = 0                                  # reset Zähler
-        # Werte noch umrechnen in % ??????????????????????????????????????????
-        for wert in nsdaten['minutely']:
-            yWerte.append(wert['precipitation'])
-            xWerte.append(zähler)
-            zähler += 1
-        diagramm_show(titel, 'Minuten', 'Niederschlag in %', xWerte, yWerte, "h")
-        return
-
-
-    def diagram_wahl():
-        # Auswertung der Auswahl der Diagramme per Radiobutton
-        #
-        # Variablen:
-        # wahl = String der Auswahl per Radiobutton
-        #
-        wahl = diagram_type.get()       # Auswahlstring lesen
-        print("Wahl = ", wahl)
+        # Plot von Niederschlag in der nächsten Stunde
         if wahl == "niederschlag":
-            dia_minutely()              # Plot von Niederschlag in der nächsten Stunde
+            titel = "Niederschlag in der nächsten Stunde   (Start um " + zeit + " Uhr)"
+            ytitel = "Niederschläge in "
+            xtitel = "Minuten"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['minutely']:
+                yWerte.append(wert['precipitation'])
+                xWerte.append(zaehler)
+                zaehler += 1
+            leg1="h"
+            einh = einheiten['regen']
+
+        # Plot von Temperaturen der nächsten 48h
+        elif wahl == "temp48":
+            titel = "Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
+            ytitel = "Temperaturen in "
+            xtitel = "Stunden"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_temp(wert['temp'], einheiten['temp'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['temp']
+
+        # Plot von gefühlten Temperaturen der nächsten 48h
+        elif wahl == 'gtemp48':
+            titel = "Gefühlte Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
+            ytitel = "Temperaturen in "
+            xtitel = "Stunden"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_temp(wert['feels_like'], einheiten['temp'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['temp']
+
+        # Plot vom Luftdruck der nächsten 48h
+        elif wahl == "luft48":
+            titel = "Luftdruck während der nächsten 48h (Start um " + zeit + " Uhr)"
+            ytitel = "Luftdruck in "
+            xtitel = "Stunden"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_temp(wert['pressure'], einheiten['druck'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['druck']
+
+        # Plot von Luftfeuchte der nächsten 48h
+        elif wahl == "luftf48":
+            titel = "Luftfeuchte während der nächsten 48h (Start um " + zeit + " Uhr)"
+            ytitel = "Luftfeuchte in "
+            xtitel = "Stunden"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_temp(wert['humidity'], einheiten['feuchte'],
+                                             True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['feuchte']
+
+        # Plot der Windstärke der nächsten 48h
+        elif wahl == "wind48":
+            titel = "Windstärke während der nächsten 48h (Start um " + zeit + " Uhr)"
+            ytitel = "Windstärke in "
+            xtitel = "Stunden"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_temp(wert['wind_speed'], einheiten['speed'],
+                                             True))
+                yWerte2.append(umrechnen_temp(wert['wind_gust'], einheiten['speed'],
+                                             True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            leg1 = "Windstärke"
+            leg2 = "Windböen"
+            einh = einheiten['speed']
+
+        # Plot der Niederschläge der nächsten 48h
+        elif wahl == "nieder48":
+            titel = "Niederschläge während der nächsten 48h (Start um " + zeit + " Uhr)"
+            ytitel = "Niederschläge in "
+            xtitel = "Stunden"
+            zaehler = 0  # reset Datenzähler
+
+            for wert in nsdaten['hourly']:
+                #yWerte.append(umrechnen_temp(wert['rain'], einheiten['regen'], True))
+                if 'rain' in wert:
+                    yWerte.append(wert['rain']['1h'])
+                else:
+                    yWerte.append(0)
+                if 'snow' in wert:
+                    yWerte2.append(wert['snow']['1h'])
+                else:
+                    yWerte2.append(0)
+                xWerte.append(zaehler)
+                zaehler += 1
+            leg1 = "Regen"
+            leg2 = "Schnee"
+            einh = einheiten['regen']
+
+        # Plot von Temperaturen der nächsten Woche
+        elif wahl == "temp5":
+            titel = "Temperaturen der nächsten Woche"
+            ytitel = "Temperaturen in "
+            xtitel = "Tage"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert['temp']['day'], einheiten['temp'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['temp']
+
+        # Plot von gefühlten Temperaturen der nächsten Woche
+        elif wahl == "gtemp5":
+            titel = "Gefühlte Temperaturen der nächsten Woche"
+            ytitel = "Temperaturen in "
+            xtitel = "Tage"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert['feels_like']['day'], einheiten[
+                    'temp'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['temp']
+
+        # Plot von min-max Temperaturen der nächsten Woche
+        elif wahl == "mmtemp5":
+            titel = "Min-Max Temperaturen der nächsten Woche"
+            ytitel = "Temperaturen in "
+            xtitel = "Tage"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert['temp']['min'], einheiten[
+                    'temp'], True))
+                yWerte2.append(umrechnen_temp(wert['temp']['max'], einheiten[
+                    'temp'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['temp']
+            leg1 = "min. Temp."
+            leg2 = "max. Temp."
+
+        # Plot des Luftdrucks der nächsten Woche
+        elif wahl == "luft5":
+            titel = "Luftdruck während der nächsten Woche"
+            ytitel = "Luftdruck in "
+            xtitel = "Tage"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert['pressure'], einheiten['druck'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['druck']
+
+        # Plot der Luftfeuchte der nächsten Woche
+        elif wahl == "luftf5":
+            titel = "Luftfeuchte während der nächsten Woche"
+            ytitel = "Luftfeuchte in "
+            xtitel = "Tage"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert['humidity'], einheiten['feuchte'], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            einh = einheiten['feuchte']
+
+        # Plot der Windstärke der nächsten Woche
+        elif wahl == "wind5":
+            titel = "Windstärke während der nächsten Woche"
+            ytitel = "Windstärke in "
+            xtitel = "Stunden"
+            zaehler = 0  # reset Datenzähler
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert['wind_speed'], einheiten['speed'],
+                                             True))
+                yWerte2.append(umrechnen_temp(wert['wind_gust'], einheiten['speed'],
+                                             True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            leg1 = "Windstärke"
+            leg2 = "Windböen"
+            einh = einheiten['speed']
+
+        # Plot der Niederschläge der nächsten Woche
+        elif wahl == "nieder5":
+            titel = "Niederschläge während der nächsten Woche"
+            ytitel = "Niederschläge in "
+            xtitel = "Tage"
+            zaehler = 0  # reset Datenzähler
+
+            for wert in nsdaten['daily']:
+                #yWerte.append(umrechnen_temp(wert['rain'], einheiten['regen'], True))
+                if 'rain' in wert:
+                    yWerte.append(wert['rain'])
+                else:
+                    yWerte.append(0)
+                if 'snow' in wert:
+                    yWerte2.append(wert['snow'])
+                else:
+                    yWerte2.append(0)
+                xWerte.append(zaehler)
+                zaehler += 1
+            leg1 = "Regen"
+            leg2 = "Schnee"
+            einh = einheiten['regen']
+
+        diagramm_show(titel, xtitel, ytitel + einh, xWerte, yWerte, leg1, yWerte2, leg2)
         return
 
 
     def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte,
-                      yWerte1=0, leg1="", yWerte2=0, leg2=''):
+                      yWerte1=[], leg1="", yWerte2=[], leg2=''):
         # Stellt einen Plot bzw. ein Diagramm dar
         # Es können 1 oder 2 Kurven gleichzeitig dargestellt werden
         #
@@ -899,50 +1100,52 @@ def tab_diagramme(lat, lon):
         if leg1 == "h":                         # gilt nur für Niederschlag 1 Stunde
             plt.plot(xWerte, yWerte1, color='b', linestyle='-')
         else:
-            if yWerte1 != 0:                    # Ausgabe des 1.Grafen
-                plt.plot(xWerte, yWerte1, color='b', linestyle='-', marker='o', label=leg1)
-            if yWerte2 != 0:                    # Ausgabe des 2.Grafen
-                plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='o', label=leg2)
-            if yWerte1 != 0 and yWerte2 != 0:   # Legende nur bei 2 Grafen anzeigen
-                plt.legend(loc='best')          # Position der Legende automatisch festlegen
+            if len(yWerte1) != 0:               # Ausgabe des 1.Grafen
+                plt.plot(xWerte, yWerte1, color='b', linestyle='-', marker='.', label=leg1)
+            if len(yWerte2) != 0:               # Ausgabe des 2.Grafen
+                plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='.', label=leg2)
+            if len(yWerte1) != 0 and len(yWerte2) != 0:   # Legende nur bei 2 Grafen
+                plt.legend(loc='best')          # Position der Legende autom. festlegen
         return
-
 
     # Radiobutton für die Diagrammauswahl einrichten
     size = 10                           # Schriftgröße
     width = 11                          # Breite der Buttons
 
-    # Beschriftung des Bereichs für die Radiobuttons
-    tk.Label(f3, text="Intervalle:", font=(font_name, 14, 'bold'),
-             width=width).place(x=0, y=630)
+    # Beschriftung des Bereichs für die Radiobuttons (RB)
+    yzeile0 = 630           # y-Position der Überschrift
+    yzeile1 = 665           # y-Position der Zeile 1 der RBs
+    yzeile2 = 695           # y-Position der Zeile 2 der RBs
+    tk.Label(f3, text="Intervalle:", font=(font_name, 12, 'bold'),
+             width=width).place(x=0, y=yzeile0)
     tk.Label(f3, text="48 Stunden:", font=(font_name, size),
-             width=width, anchor=E).place(x=10, y=675)
+             width=width, anchor=E).place(x=10, y=yzeile1)
     tk.Label(f3, text="5 Tage:", font=(font_name, size), width=width,
-             anchor=E).place(x=10, y=710)
+             anchor=E).place(x=10, y=yzeile2)
 
     # Liste der Radiobutton-Parameter
     # rbp = [text, value, width, x-koord, ykoord]
-    rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, 745],
-           ["Temperatur", "temp48", 11, 110, 675],
-           ["Temperatur", "temp5", 11, 110, 710],
-           ["gef. Temp.", "gtemp48", 11, 203, 675],
-           ["gef. Temp.", "gtemp5", 11, 203, 710],
-           ["min-max Temp.", "mmtemp58", 14, 296, 675],
-           ["min-max Temp.", "mmtemp5", 14, 296, 710],
-           ["Luftdruck", "luft48", 10, 413, 675],
-           ["Luftdruck", "luft5", 10, 413, 710],
-           ["Luftfeuchte", "luftf48", 11, 498, 675],
-           ["Luftfeuchte", "luftf5", 11, 498, 710],
-           ["Wind", "wind48", 6, 591, 675],
-           ["Wind", "wind5", 6, 591, 710],
-           ["Niederschlag", "nieder48", 13, 645, 675],
-           ["Niederschlag", "nieder5", 13, 645, 710]]
+    rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, 725],
+           ["Temperatur", "temp48", 11, 110, yzeile1],
+           ["Temperatur", "temp5", 11, 110, yzeile2],
+           ["gef. Temp.", "gtemp48", 11, 203, yzeile1],
+           ["gef. Temp.", "gtemp5", 11, 203, yzeile2],
+           #["min-max Temp.", "mmtemp58", 14, 296, yzeile1],
+           ["min-max Temp.", "mmtemp5", 14, 296, yzeile2],
+           ["Luftdruck", "luft48", 10, 413, yzeile1],
+           ["Luftdruck", "luft5", 10, 413, yzeile2],
+           ["Luftfeuchte", "luftf48", 11, 498, yzeile1],
+           ["Luftfeuchte", "luftf5", 11, 498, yzeile2],
+           ["Wind", "wind48", 6, 591, yzeile1],
+           ["Wind", "wind5", 6, 591, yzeile2],
+           ["Niederschlag", "nieder48", 13, 645, yzeile1],
+           ["Niederschlag", "nieder5", 13, 645, yzeile2]]
 
     # Radiobuttons für die Diagrammauswahl einrichten + platzieren
-    for x in range(0,15):
+    for x in range(0, len(rbp)):
         Radiobutton(f3, text=rbp[x][0], value=rbp[x][1], indicatoron=0,
-                        font=(font_name, size), width=rbp[x][2], height=1,
-                        variable=diagram_type, command=diagram_wahl)\
+                    font=(font_name, size), width=rbp[x][2], height=1,
+                    variable=diagram_type, command=diagram_wahl)\
                     .place(x=rbp[x][3], y=rbp[x][4])
     diagram_type.set("niederschlag")
     diagram_wahl()
@@ -1080,7 +1283,7 @@ tab_vorhersage(dat_forecast, einheiten, icon_path)
 tab_details(dat_onecall, dat_forecast, orte, einheiten, icon_path)
 
 # TAB Diagramme füllen
-tab_diagramme(orte['lat'], orte['lon'])
+tab_diagramme(orte['lat'], orte['lon'], einheiten)
 
 tick()  # Uhr Ticker
 gui_wetter.mainloop()
