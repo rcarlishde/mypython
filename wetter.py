@@ -3,7 +3,7 @@
 ********************************
 * Dateiname: einstellungen.py  *
 *   Version: 2.2               *
-*     Stand: 26.07.2021        *
+*     Stand: 03.08.2021        *
 *     Autor: Richard Carl      *
 ********************************
 
@@ -815,30 +815,30 @@ def tab_diagramme(lat, lon, einheiten):
         return r.json()
 
     def diagram_wahl():
-        # Auswertung der Auswahl der Diagramme per Radiobutton
+        # Auswertung der Auswahl der Diagramme per Klick auf Radiobutton
         #
         # Variablen:
-        # wahl = String der Auswahl per Radiobutton
-        # nsdaten   = Niederschlagsdaten aus dem Web
-        # zeit_h    = Hilfsvariable zur Ermittlung aktuellen Zeit
-        # zeit      = aktuelle Zeit als String
-        # titel     = Titel des Plots
-        # yWerte    = Niederschlagswerte
-        # xWerte    = Minuten auf der x-Achse
-        # zähler    = Anzahl der yWerte
-        # index     = [einheit, yWerte[0], yWerte[][1], yWerte2[0], yWerte2[][1]]
+        #            wahl   = String der Auswahl per Radiobutton
+        #         nsdaten   = Niederschlagsdaten aus dem Web
+        #          zeit_h   = Hilfsvariable zur Ermittlung aktuellen Zeit
+        #            zeit   = aktuelle Zeit als String
+        #           titel   = Titel des Plots
+        # yWerte, yWerte2   = Niederschlagswerte
+        #          xWerte   = Daten für die x-Achse
+        #          zähler   = Anzahl der yWerte bzw. Wetterdaten
+        #           index   = [0=einheit, 1=yWerte[0], 2=yWerte[][1], 3=yWerte2[0], 4=yWerte2[][1]]
+
+        # Listen initialisieren
+        xWerte, yWerte, yWerte2 = [], [], []    # Listen der x+y-Werte
+        titel = ""                              # Diagrammtitel
+        leg = ['', '']                          # Legendentexte
+        einh = ""                               # Einheiten für Diagramme
+        datenliste = []                         # Teile der Webdaten (minutely, hourly, daily)
+        index = []                              # Steuerung der Datenbeschaffung aus dem Web
 
         wahl = diagram_type.get()               # Auswahlstring lesen
-
         nsdaten = daten_lesen(lat, lon)         # Webdaten lesen
-        xWerte, yWerte, yWerte2 = [], [], []    # x-y Listen init
-        titel = ""                              # Diagrammtitel init
-        xtitel, ytitel = "", ""                 # Titel der x- und Y-Achse
-        leg1, leg2 = "", ""                     # Legendentext init
-        leg = ['', '']
-        einh = ""                               # Einheiten für Diagramm
-        datenliste = []
-        index = []
+
 
         # Startzeit des Grafen ermitteln
         zeit_h = datetime.datetime.fromtimestamp(nsdaten['hourly'][0]['dt'])
@@ -848,7 +848,6 @@ def tab_diagramme(lat, lon, einheiten):
         else:
             zeit = str(zeit_h.hour) + ":" + str(zeit_h.minute)
 
-
         # Plot von Niederschlag in der nächsten Stunde
         if wahl == "niederschlag":
             titel = "Niederschlag in der nächsten Stunde   (Start um " + zeit + " Uhr)"
@@ -856,6 +855,7 @@ def tab_diagramme(lat, lon, einheiten):
             xtitel = "Minuten"
             datenliste = nsdaten['minutely']
             index = ['regen', 'precipitation']
+            leg = ['h', '']
             datenstatus = 2
 
         # Plot von Temperaturen der nächsten 48h
@@ -909,22 +909,23 @@ def tab_diagramme(lat, lon, einheiten):
             titel = "Niederschläge während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Niederschläge in "
             xtitel = "Stunden"
-            zaehler = 0  # reset Datenzähler
-            index = ['regen']                           # ??????????????????????
+            index = ['regen']
             leg = ['Regen', 'Schnee']
-            datenstatus = 0
+            # Eigene Routine zur Wertebeschaffung da geprüft wird, ob Regen oder Schnee überhaupt
+            # angegeben sind
+            datenstatus = 0                             # gemeinsame Wertebeschaffung umgehen
+            zaehler = 0                                 # reset Datenzähler
             for wert in nsdaten['hourly']:
-                if 'rain' in wert:
-                    yWerte.append(wert['rain']['1h'])
+                if 'rain' in wert:                      # Werte für Regen angegeben?
+                    yWerte.append(wert['rain']['1h'])   # Ja, Daten lesen
                 else:
-                    yWerte.append(0)
-                if 'snow' in wert:
-                    yWerte2.append(wert['snow']['1h'])
+                    yWerte.append(0)                    # Nein, Werte auf 0 stellen
+                if 'snow' in wert:                      # Werte für Schnee angegeben?
+                    yWerte2.append(wert['snow']['1h'])  # Ja, Daten lesen
                 else:
-                    yWerte2.append(0)
-                xWerte.append(zaehler)
+                    yWerte2.append(0)                   # Nein, Werte auf 0 stellen
+                xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 1
-            einh = einheiten['regen']                   # ??????????????????????
 
         # Plot von Temperaturen der nächsten Woche
         elif wahl == "temp5":
@@ -972,7 +973,6 @@ def tab_diagramme(lat, lon, einheiten):
             index = ['feuchte', 'humidity']
             datenstatus = 1
 
-
         # Plot der Windstärke der nächsten Woche
         elif wahl == "wind5":
             titel = "Windstärke während der nächsten Woche"
@@ -983,7 +983,6 @@ def tab_diagramme(lat, lon, einheiten):
             leg = ['Windstärke', 'Windböen']
             datenstatus = 1
 
-
         # Plot der Niederschläge der nächsten Woche
         elif wahl == "nieder5":
             titel = "Niederschläge während der nächsten Woche"
@@ -991,25 +990,26 @@ def tab_diagramme(lat, lon, einheiten):
             xtitel = "Tage"
             leg = ['Regen', 'Schnee']
             index = ['regen']
-            datenstatus = 0
-
-            zaehler = 0
+            datenstatus = 0                             # gemeinsame Wertebeschaffung umgehen
+            zaehler = 0                                 # reset Datenzähler
             for wert in nsdaten['daily']:
-                if 'rain' in wert:
-                    yWerte.append(wert['rain'])
+                if 'rain' in wert:                      # Werte für Regen angegeben?
+                    yWerte.append(wert['rain'])         # Ja, Daten lesen
                 else:
-                    yWerte.append(0)
-                if 'snow' in wert:
-                    yWerte2.append(wert['snow'])
+                    yWerte.append(0)                    # Nein, Werte auf 0 stellen
+                if 'snow' in wert:                      # Werte für Schnee angegeben?
+                    yWerte2.append(wert['snow'])        # Ja, Daten lesen
                 else:
-                    yWerte2.append(0)
-                xWerte.append(zaehler)
+                    yWerte2.append(0)                   # Nein, Werte auf 0 stellen
+                xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 1
 
-        einh = einheiten[index[0]]
+        einh = einheiten[index[0]]                      # Einheiten setzen
+
+        # Gemeinsame Routinen zur Wertebeschaffung
         zaehler = 0
 
-        # yWerte + yWerte2 mit umrechnen
+        # Beide yWerte mit Umrechnung der Werte - beide mit einfachem Index
         if datenstatus == 1:
             for wert in datenliste:
                 yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
@@ -1018,6 +1018,7 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)
                 zaehler += 1
 
+        # Beide yWerte ohne Umrechnung - beide mit einfachem Index
         elif datenstatus == 2:
             for wert in datenliste:
                 yWerte.append(wert[index[1]])
@@ -1026,6 +1027,7 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)
                 zaehler += 1
 
+        # Beide yWerte ohne Umrechnung - mit Doppelindex yWerte, einfachem Index yWerte2
         elif datenstatus == 3:
             for wert in datenliste:
                 yWerte.append(wert[index[1]][index[2]])
@@ -1034,6 +1036,7 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)
                 zaehler += 1
 
+        # Beide yWerte mit Umrechnung - beide mit Doppelindex
         elif datenstatus == 4:
             for wert in datenliste:
                 yWerte.append(umrechnen_temp(wert[index[1]][index[2]],
@@ -1044,8 +1047,7 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)
                 zaehler += 1
 
-        diagramm_show(titel, xtitel, ytitel + einh, xWerte, yWerte, leg[0], yWerte2,
-                      leg[1])
+        diagramm_show(titel, xtitel, ytitel + einh, xWerte, yWerte, leg[0], yWerte2, leg[1])
         return
 
     def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte,
@@ -1063,17 +1065,19 @@ def tab_diagramme(lat, lon, einheiten):
         # leg1          = Bezeichnung der Gruppe 1 in der Legende
         # leg2          = Bezeichnung der Gruppe 2 in der Legende
         #
+        # Neuen Plot aufbauen
         plt.close("all")                                # vorhandene Plots schließen
-        plt.clf()
         plt.rcParams["figure.figsize"] = (7.4, 6)       # Größe des Plots
         figTemp = plt.figure()
         canvas = FigureCanvasTkAgg(figTemp, master=f3)  # TAB Diagramme auswählen
         canvas.get_tk_widget().place(x=15, y=20)        # Position des Plots im TAB
+
         # Beschriftung der Achsen und des Plotfensters
         plt.title(text_Titel)
         plt.ylabel(text_yAchse)
         plt.xlabel(text_xAchse)
-        plt.grid(True)                      # Gitternetz ein
+        plt.grid(True)                          # Gitternetz ein
+
         # Plot ausgeben
         if leg1 == "h":                         # gilt nur für Niederschlag 1 Stunde
             plt.plot(xWerte, yWerte1, color='b', linestyle='-')
@@ -1098,17 +1102,16 @@ def tab_diagramme(lat, lon, einheiten):
              width=width).place(x=0, y=yzeile0)
     tk.Label(f3, text="48 Stunden:", font=(font_name, size),
              width=width, anchor=E).place(x=10, y=yzeile1)
-    tk.Label(f3, text="5 Tage:", font=(font_name, size), width=width,
+    tk.Label(f3, text="1 Woche:", font=(font_name, size), width=width,
              anchor=E).place(x=10, y=yzeile2)
 
     # Liste der Radiobutton-Parameter
-    # rbp = [text, value, width, x-koord, ykoord]
+    # rbp = [text, value(wahl), width, x-koord, y-koord]
     rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, 725],
            ["Temperatur", "temp48", 11, 110, yzeile1],
            ["Temperatur", "temp5", 11, 110, yzeile2],
            ["gef. Temp.", "gtemp48", 11, 203, yzeile1],
            ["gef. Temp.", "gtemp5", 11, 203, yzeile2],
-           #["min-max Temp.", "mmtemp58", 14, 296, yzeile1],
            ["min-max Temp.", "mmtemp5", 14, 296, yzeile2],
            ["Luftdruck", "luft48", 10, 413, yzeile1],
            ["Luftdruck", "luft5", 10, 413, yzeile2],
@@ -1122,10 +1125,10 @@ def tab_diagramme(lat, lon, einheiten):
     # Radiobuttons für die Diagrammauswahl einrichten + platzieren
     for x in range(0, len(rbp)):
         Radiobutton(f3, text=rbp[x][0], value=rbp[x][1], indicatoron=0, font=(font_name, size),
-                    width=rbp[x][2], height=1, variable=diagram_type,
-                    command=diagram_wahl).place(x=rbp[x][3], y=rbp[x][4])
-    diagram_type.set("niederschlag")
-    diagram_wahl()
+                    width=rbp[x][2], height=1, variable=diagram_type, command=diagram_wahl)\
+                    .place(x=rbp[x][3], y=rbp[x][4])
+    diagram_type.set("niederschlag")        # Start mit Niederschlag in nächster Stunde
+    diagram_wahl()                          # Auswahl und Reaktion auf Radiobutton-Klick
     return
 
 
@@ -1137,32 +1140,34 @@ def tab_diagramme(lat, lon, einheiten):
 
 # Fonts definieren
 daten = {}
-daten = dateien('r', daten, 'aussehen')
+daten = dateien('r', daten, 'aussehen')     # Daten aus Einstellungen-TAB-Aussehen
 font_name = daten['name_font']
 font_size = daten['name_size']
 iconset = daten['name_iconset']
-font_wb = "bold"  # Schrift - fett
+font_wb = "bold"                            # Schrift - fett
 
 # Fixwerte definieren
-bg_col = 'white'  # Hintergrundfarbe für Überschriften der Vorhersage
-datei_path = 'files/'  # Pfad zu den Einstelldaten
-# Pfad zum zutreffenden Iconset definieren
+bg_col = 'white'        # Hintergrundfarbe für Überschriften der Vorhersage
+datei_path = 'files/'   # Pfad zu den Einstelldaten
+
+# Pfade zu den Iconsets definieren
 if iconset == "Iconsatz 1":
-    icon_path = datei_path + 'icons1/'  # Pfad zu den Icons
+    icon_path = datei_path + 'icons1/'      # Pfad zu den Icons
 elif iconset == "Iconsatz 2":
-    icon_path = datei_path + 'icons2/'  # Pfad zu den Icons
+    icon_path = datei_path + 'icons2/'      # Pfad zu den Icons
 else:
-    icon_path = datei_path + 'icons/'  # Pfad zu den Icons
-# fixe Fensterparameter
-frame_width = 860  # Fensterbreite
-frame_height = 1110  # Fensterhöhe
-frame_ypos = 50  # Leistenabstand
+    icon_path = datei_path + 'icons/'       # Pfad zu den Icons
+
+# fixe Parameter des Hauptfensters
+frame_width = 860                           # Fensterbreite
+frame_height = 1110                         # Fensterhöhe
+frame_ypos = 50                             # Leistenabstand
 
 # Datenbeschaffung
 # ----------------
 # Ortsdaten lesen
 orte = dateien('r', '', 'orte')
-# print('Ort:\n', ort)          #debugging
+# print('Ort:\n', ort)                      # debugging
 
 # Einheiten einlesen
 einheiten = {}
@@ -1172,11 +1177,12 @@ einheiten = dateien('r', einheiten, 'einheiten')
 dat_forecast = get_Wetterdaten(orte['lat'], orte['lon'], 'forecast')
 dat_onecall = get_Wetterdaten(orte['lat'], orte['lon'])
 
+
 # Hauptfenster erstellen
 # ======================
 
-gui_wetter = tk.Tk()  # Fenster aktivieren
-gui_wetter['bg'] = col_gui_wetter  # Hintergrundfarbe des Hauptfensters
+gui_wetter = tk.Tk()                            # Fenster aktivieren
+gui_wetter['bg'] = col_gui_wetter               # Hintergrundfarbe des Hauptfensters
 
 # eigenes Logo für das Hauptfenster festlegen
 logo = tk.PhotoImage(file=icon_path + "fair_day.png")
@@ -1184,16 +1190,16 @@ gui_wetter.tk.call('wm', 'iconphoto', gui_wetter._w, logo)
 
 # Bildschirmgröße und seine Position ermitteln
 # --------------------------------------------
-screen_width = gui_wetter.winfo_screenwidth()  # Breite des verwendeten Bildschirms
-frame_xpos = screen_width - frame_width  # Parameter für Rechtsbündigkeit berechnen
+screen_width = gui_wetter.winfo_screenwidth()   # Breite des verwendeten Bildschirms
+frame_xpos = screen_width - frame_width         # Parameter für Rechtsbündigkeit berechnen
 # Hinweis: use width x height + x_offset + y_offset (no spaces!)
 gui_wetter.geometry("%dx%d+%d+%d" % (frame_width, frame_height, frame_xpos, frame_ypos))
 
-# Überschriften fürs Hauptfenster
+# Fontparameter der Überschriften
 # -------------------------------
-gui_wetter.title('Wettervorhersage')  # Kopfzeile des Fensters
+gui_wetter.title('Wettervorhersage')            # Kopfzeile des Fensters
 
-fontStyle = tkFont.Font(family=font_name, size=font_size)  # Font für Button auf TABs
+fontStyle = tkFont.Font(family=font_name, size=font_size)         # Font für Button auf TABs
 ttk.Style().configure(".", font=(font_name, font_size, font_wb))  # Font für die Tabs
 # Standard-Fonts anpassen
 default_font = tkFont.nametofont("TkTextFont")
@@ -1203,13 +1209,13 @@ default_font.configure(family=font_name, size=font_size)
 
 # Logo anzeigen
 lab_kopf = tk.Label(gui_wetter, image=logo, borderwidth=2, relief='groove', bg=col_lab_kopf)
-# Ortsnamen holen und verkürzen
-# ort = dateien('r', '', 'orte')              # Ortsdaten aus Datei 'orte.json' holen
-ort = orte['name']  # beschränken auf den Ortsnamen
+
+# Ortsnamen holen und Texte verkürzen
+ort = orte['name']                            # beschränken auf den Ortsnamen
 ort_index = 0
 for x in range(0, 3):
     ort_index = ort.find(',', ort_index) + 1  # 3 x finden eines Kommas im String
-ort = ort[:ort_index - 1]  # Verkürzen des Ortsnamens für Überschrift
+ort = ort[:ort_index - 1]                     # Verkürzen des Ortsnamens für Überschrift
 
 # Überschriften ausgeben
 lab_kopf_1 = tk.Label(gui_wetter, text="Wettervorhersage", font=(font_name, 18, font_wb),
@@ -1219,7 +1225,6 @@ lab_kopf_2 = tk.Label(gui_wetter, text=ort, font=(font_name, 14, font_wb),
 kopf_zeit = akt_zeit()
 lab_kopf_3 = tk.Label(gui_wetter, text=kopf_zeit, font=(font_name, 10),
                       bg=col_lab_kopf123, fg=col_text_kopf123)
-
 # Logo und Überschriften im Kopf positionieren
 lab_kopf.place(x=50, y=20)
 lab_kopf_1.place(x=200, y=25)
@@ -1230,12 +1235,10 @@ lab_kopf_3.place(x=200, y=100)
 # ---------------
 nb = ttk.Notebook(gui_wetter)
 nb.place(x=10, y=150)  # Startposition der Tabs
-
 f1 = tk.Frame(bg=col_f1)
 f2 = tk.Frame(bg=col_f2)
 f3 = tk.Frame(bg=col_f3)
 f4 = tk.Frame(bg=col_f4)
-
 # TABs beschriften
 nb.add(f1, text=' Vorhersage ')
 nb.add(f2, text=' Details ')
