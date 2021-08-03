@@ -150,6 +150,7 @@ def plus_unit(wert, unit):
     wert = "{:.0f}".format(wert)
     return wert + " " + unit
 
+
 def umrechnen_druck(druck, unitDruck, numeral=False):
     # Umrechnen des Luftdrucks passend zu den eingestellten Einheiten
     # Basis ist hPa
@@ -157,7 +158,7 @@ def umrechnen_druck(druck, unitDruck, numeral=False):
     if unitDruck == 'mmHG':
         druck = druck * 0.75006375541921
     druck = "{:.2f}".format(druck)
-    if numeral == False:
+    if numeral is False:
         return druck + " " + unitDruck
     else:
         return float(druck)
@@ -173,7 +174,7 @@ def umrechnen_temp(temp, unitTemp, numeral=False):
         temp = ((temp - 273.15) * 9 / 5) + 32
     temp = round(temp, 1)
     temp = "{:.1f}".format(temp)
-    if numeral == False:
+    if numeral is False:
         return str(temp) + " " + unitTemp
     else:
         return float(temp)
@@ -464,8 +465,7 @@ def daten_selektieren(daten_forecast, einheiten):
                 dat[count].update({'weather': {0: {'description': 'Bewölkung',
                                                    'icon': 'unknown'}}})
                 dat[count].update({'clouds': {'all': ''}})
-                dat[count].update({'wind': {'speed': 'Windstärke', 'deg': '', 'gust': ''}
-                                   })
+                dat[count].update({'wind': {'speed': 'Windstärke', 'deg': '', 'gust': ''}})
                 dat[count].update({'rain': {'3h': ''}})
                 dat[count].update({'snow': {'3h': ''}})
                 dat[count].update({'dt_txt': ''})
@@ -482,35 +482,24 @@ def daten_selektieren(daten_forecast, einheiten):
             status = False  # ungültigen Datensatzes nur einmal ausgeben, reset status
 
             # Nur die Datensätze mit passenden Zeiten (day_time) speichern
-            dat.update({count: {'main': {
-                                     'temp': umrechnen_temp(daten[anz]['main']['temp'],
-                                                            einheiten['temp']),
-                                     'feels_like': umrechnen_temp(
-                                         daten[anz]['main']['feels_like'],
-                                         einheiten['temp']),
-                                     'temp_min': umrechnen_temp(
-                                         daten[anz]['main']['temp_min'],
-                                         einheiten['temp']),
-                                     'temp_max': umrechnen_temp(
-                                         daten[anz]['main']['temp_max'],
-                                         einheiten['temp']),
-                                     'pressure': umrechnen_druck(
-                                         daten[anz]['main']['pressure'],
-                                         einheiten['druck']),
-                                     'humidity': plus_unit(daten[anz]['main']['humidity'],
-                                                           einheiten['feuchte'])
-                                     }}})
+            dat.update({count:
+                {'main': {
+                    'temp': umrechnen_temp(daten[anz]['main']['temp'], einheiten['temp']),
+                    'feels_like': umrechnen_temp(
+                        daten[anz]['main']['feels_like'], einheiten['temp']),
+                    'temp_min': umrechnen_temp(daten[anz]['main']['temp_min'], einheiten['temp']),
+                    'temp_max': umrechnen_temp(daten[anz]['main']['temp_max'], einheiten['temp']),
+                    'pressure': umrechnen_druck(daten[anz]['main']['pressure'], einheiten['druck']),
+                    'humidity': plus_unit(daten[anz]['main']['humidity'], einheiten['feuchte'])}}})
             dat[count].update({'weather': {0: {
                                'description': daten[anz]['weather'][0]['description'],
-                               'icon': daten[anz]['weather'][0]['icon']
-                               }}})
+                               'icon': daten[anz]['weather'][0]['icon']}}})
             dat[count].update({'clouds': {'all': plus_unit(daten[anz]['clouds']['all'],
                                                            einheiten['wolken'])}})
             dat[count].update({'wind': {
                 'speed': umrechnen_wind(daten[anz]['wind']['speed'], einheiten['speed']),
                 'deg': umrechnen_windrichtung(daten[anz]['wind']['deg']),
-                'gust': umrechnen_wind(daten[anz]['wind']['gust'], einheiten['speed'])
-            }})
+                'gust': umrechnen_wind(daten[anz]['wind']['gust'], einheiten['speed'])}})
             # Niederschläge werden nur angegeben, wenn sie auch vorhanden sind
             if 'rain' in daten[anz].keys():
                 dat[count].update({'rain': {'3h': plus_unit(daten[anz]['rain']['3h'],
@@ -651,7 +640,7 @@ def tab_vorhersage(daten_forecast, einheiten, image_path):
             # logo für die Steuerung von tooltipps einrichten
             arg = day * 4 + day_time
             lab_logo.bind('<Enter>', lambda event,
-                            arg=arg: detailOn(event, arg, detailKoord[arg]))
+                          arg=arg: detailOn(event, arg, detailKoord[arg]))
             lab_logo.bind('<Leave>', detailOff)
 
     # Fenster für ToolTipps einrichten
@@ -719,11 +708,9 @@ def tab_details(dat_onecall, daten_forecast, ort, einheiten, image_path):
     text6 += "         Gefühlte: " + umrechnen_temp(dat_onecall['current']['feels_like'],
                                                     einheiten['temp']) + '\n'
     text6 += "          Minimal: " + umrechnen_temp(
-        dat_onecall['daily'][0]['temp']['min'],
-        einheiten['temp']) + '\n'
+        dat_onecall['daily'][0]['temp']['min'], einheiten['temp']) + '\n'
     text6 += "          Maximal: " + umrechnen_temp(
-        dat_onecall['daily'][0]['temp']['max'],
-        einheiten['temp']) + '\n'
+        dat_onecall['daily'][0]['temp']['max'], einheiten['temp']) + '\n'
     text6 += "         Taupunkt: " + umrechnen_temp(dat_onecall['current']['dew_point'],
                                                     einheiten['temp']) + '\n\n'
     text6 += "ATHMOSPHÄRE: \n"
@@ -827,7 +814,6 @@ def tab_diagramme(lat, lon, einheiten):
         r = requests.get(url)
         return r.json()
 
-
     def diagram_wahl():
         # Auswertung der Auswahl der Diagramme per Radiobutton
         #
@@ -840,7 +826,7 @@ def tab_diagramme(lat, lon, einheiten):
         # yWerte    = Niederschlagswerte
         # xWerte    = Minuten auf der x-Achse
         # zähler    = Anzahl der yWerte
-
+        # index     = [einheit, yWerte[0], yWerte[][1], yWerte2[0], yWerte2[][1]]
 
         wahl = diagram_type.get()               # Auswahlstring lesen
 
@@ -849,7 +835,10 @@ def tab_diagramme(lat, lon, einheiten):
         titel = ""                              # Diagrammtitel init
         xtitel, ytitel = "", ""                 # Titel der x- und Y-Achse
         leg1, leg2 = "", ""                     # Legendentext init
+        leg = ['', '']
         einh = ""                               # Einheiten für Diagramm
+        datenliste = []
+        index = []
 
         # Startzeit des Grafen ermitteln
         zeit_h = datetime.datetime.fromtimestamp(nsdaten['hourly'][0]['dt'])
@@ -859,94 +848,72 @@ def tab_diagramme(lat, lon, einheiten):
         else:
             zeit = str(zeit_h.hour) + ":" + str(zeit_h.minute)
 
+
         # Plot von Niederschlag in der nächsten Stunde
         if wahl == "niederschlag":
             titel = "Niederschlag in der nächsten Stunde   (Start um " + zeit + " Uhr)"
             ytitel = "Niederschläge in "
             xtitel = "Minuten"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['minutely']:
-                yWerte.append(wert['precipitation'])
-                xWerte.append(zaehler)
-                zaehler += 1
-            leg1="h"
-            einh = einheiten['regen']
+            datenliste = nsdaten['minutely']
+            index = ['regen', 'precipitation']
+            datenstatus = 2
 
         # Plot von Temperaturen der nächsten 48h
         elif wahl == "temp48":
             titel = "Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['hourly']:
-                yWerte.append(umrechnen_temp(wert['temp'], einheiten['temp'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['temp']
+            datenliste = nsdaten['hourly']
+            index = ['temp', 'temp']
+            datenstatus = 1
 
         # Plot von gefühlten Temperaturen der nächsten 48h
         elif wahl == 'gtemp48':
             titel = "Gefühlte Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['hourly']:
-                yWerte.append(umrechnen_temp(wert['feels_like'], einheiten['temp'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['temp']
+            datenliste = nsdaten['hourly']
+            index = ['temp', 'feels_like']
+            datenstatus = 1
 
         # Plot vom Luftdruck der nächsten 48h
         elif wahl == "luft48":
             titel = "Luftdruck während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Luftdruck in "
             xtitel = "Stunden"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['hourly']:
-                yWerte.append(umrechnen_temp(wert['pressure'], einheiten['druck'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['druck']
+            datenliste = nsdaten['hourly']
+            index = ['druck', 'pressure']
+            datenstatus = 1
 
         # Plot von Luftfeuchte der nächsten 48h
         elif wahl == "luftf48":
             titel = "Luftfeuchte während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Luftfeuchte in "
             xtitel = "Stunden"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['hourly']:
-                yWerte.append(umrechnen_temp(wert['humidity'], einheiten['feuchte'],
-                                             True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['feuchte']
+            datenliste = nsdaten['hourly']
+            index = ['feuchte', 'humidity']
+            datenstatus = 1
 
         # Plot der Windstärke der nächsten 48h
         elif wahl == "wind48":
             titel = "Windstärke während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Windstärke in "
             xtitel = "Stunden"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['hourly']:
-                yWerte.append(umrechnen_temp(wert['wind_speed'], einheiten['speed'],
-                                             True))
-                yWerte2.append(umrechnen_temp(wert['wind_gust'], einheiten['speed'],
-                                             True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            leg1 = "Windstärke"
-            leg2 = "Windböen"
-            einh = einheiten['speed']
+            datenliste = nsdaten['hourly']
+            index = ['speed', 'wind_speed', '', 'wind_gust']
+            leg = ['Windstärke', 'Windböen']
+            datenstatus = 2
 
-        # Plot der Niederschläge der nächsten 48h
+         # Plot der Niederschläge der nächsten 48h
         elif wahl == "nieder48":
             titel = "Niederschläge während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Niederschläge in "
             xtitel = "Stunden"
             zaehler = 0  # reset Datenzähler
-
+            index = ['regen']                           # ??????????????????????
+            leg = ['Regen', 'Schnee']
+            datenstatus = 0
             for wert in nsdaten['hourly']:
-                #yWerte.append(umrechnen_temp(wert['rain'], einheiten['regen'], True))
                 if 'rain' in wert:
                     yWerte.append(wert['rain']['1h'])
                 else:
@@ -957,102 +924,77 @@ def tab_diagramme(lat, lon, einheiten):
                     yWerte2.append(0)
                 xWerte.append(zaehler)
                 zaehler += 1
-            leg1 = "Regen"
-            leg2 = "Schnee"
-            einh = einheiten['regen']
+            einh = einheiten['regen']                   # ??????????????????????
 
         # Plot von Temperaturen der nächsten Woche
         elif wahl == "temp5":
             titel = "Temperaturen der nächsten Woche"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['daily']:
-                yWerte.append(umrechnen_temp(wert['temp']['day'], einheiten['temp'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['temp']
+            datenliste = nsdaten['daily']
+            index = ['temp', 'temp', 'day']
+            datenstatus = 3
 
         # Plot von gefühlten Temperaturen der nächsten Woche
         elif wahl == "gtemp5":
             titel = "Gefühlte Temperaturen der nächsten Woche"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['daily']:
-                yWerte.append(umrechnen_temp(wert['feels_like']['day'], einheiten[
-                    'temp'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['temp']
+            datenliste = nsdaten['daily']
+            index = ['temp', 'feels_like', 'day']
+            datenstatus = 3
 
         # Plot von min-max Temperaturen der nächsten Woche
         elif wahl == "mmtemp5":
             titel = "Min-Max Temperaturen der nächsten Woche"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['daily']:
-                yWerte.append(umrechnen_temp(wert['temp']['min'], einheiten[
-                    'temp'], True))
-                yWerte2.append(umrechnen_temp(wert['temp']['max'], einheiten[
-                    'temp'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['temp']
-            leg1 = "min. Temp."
-            leg2 = "max. Temp."
+            datenliste = nsdaten['daily']
+            index = ['temp', 'temp', 'min', 'temp', 'max']
+            leg = ['min. Temp.', 'max. Temp']
+            datenstatus = 4
 
         # Plot des Luftdrucks der nächsten Woche
         elif wahl == "luft5":
             titel = "Luftdruck während der nächsten Woche"
             ytitel = "Luftdruck in "
             xtitel = "Tage"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['daily']:
-                yWerte.append(umrechnen_temp(wert['pressure'], einheiten['druck'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['druck']
+            datenliste = nsdaten['daily']
+            index = ['druck', 'pressure']
+            datenstatus = 1
 
         # Plot der Luftfeuchte der nächsten Woche
         elif wahl == "luftf5":
             titel = "Luftfeuchte während der nächsten Woche"
             ytitel = "Luftfeuchte in "
             xtitel = "Tage"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['daily']:
-                yWerte.append(umrechnen_temp(wert['humidity'], einheiten['feuchte'], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            einh = einheiten['feuchte']
+            datenliste = nsdaten['daily']
+            index = ['feuchte', 'humidity']
+            datenstatus = 1
+
 
         # Plot der Windstärke der nächsten Woche
         elif wahl == "wind5":
             titel = "Windstärke während der nächsten Woche"
             ytitel = "Windstärke in "
             xtitel = "Stunden"
-            zaehler = 0  # reset Datenzähler
-            for wert in nsdaten['daily']:
-                yWerte.append(umrechnen_temp(wert['wind_speed'], einheiten['speed'],
-                                             True))
-                yWerte2.append(umrechnen_temp(wert['wind_gust'], einheiten['speed'],
-                                             True))
-                xWerte.append(zaehler)
-                zaehler += 1
-            leg1 = "Windstärke"
-            leg2 = "Windböen"
-            einh = einheiten['speed']
+            datenliste = nsdaten['daily']
+            index = ['speed', 'wind_speed', 'wind_gust']
+            leg = ['Windstärke', 'Windböen']
+            datenstatus = 1
+
 
         # Plot der Niederschläge der nächsten Woche
         elif wahl == "nieder5":
             titel = "Niederschläge während der nächsten Woche"
             ytitel = "Niederschläge in "
             xtitel = "Tage"
-            zaehler = 0  # reset Datenzähler
+            leg = ['Regen', 'Schnee']
+            index = ['regen']
+            datenstatus = 0
 
+            zaehler = 0
             for wert in nsdaten['daily']:
-                #yWerte.append(umrechnen_temp(wert['rain'], einheiten['regen'], True))
                 if 'rain' in wert:
                     yWerte.append(wert['rain'])
                 else:
@@ -1063,16 +1005,51 @@ def tab_diagramme(lat, lon, einheiten):
                     yWerte2.append(0)
                 xWerte.append(zaehler)
                 zaehler += 1
-            leg1 = "Regen"
-            leg2 = "Schnee"
-            einh = einheiten['regen']
 
-        diagramm_show(titel, xtitel, ytitel + einh, xWerte, yWerte, leg1, yWerte2, leg2)
+        einh = einheiten[index[0]]
+        zaehler = 0
+
+        # yWerte + yWerte2 mit umrechnen
+        if datenstatus == 1:
+            for wert in datenliste:
+                yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
+                if len(index) > 3:
+                    yWerte2.append(umrechnen_temp(wert[index[3]], einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+
+        elif datenstatus == 2:
+            for wert in datenliste:
+                yWerte.append(wert[index[1]])
+                if len(index) > 3:
+                    yWerte2.append(wert[index[3]])
+                xWerte.append(zaehler)
+                zaehler += 1
+
+        elif datenstatus == 3:
+            for wert in datenliste:
+                yWerte.append(wert[index[1]][index[2]])
+                if len(index) > 3:
+                    yWerte2.append(wert[index[3]])
+                xWerte.append(zaehler)
+                zaehler += 1
+
+        elif datenstatus == 4:
+            for wert in datenliste:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]],
+                                            einheiten[index[0]], True))
+                if len(index) > 3:
+                    yWerte2.append(umrechnen_temp(wert[index[3]][index[4]],
+                                    einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+
+        diagramm_show(titel, xtitel, ytitel + einh, xWerte, yWerte, leg[0], yWerte2,
+                      leg[1])
         return
 
-
     def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte,
-                      yWerte1=[], leg1="", yWerte2=[], leg2=''):
+                      yWerte1=None, leg1="", yWerte2=None, leg2=''):
         # Stellt einen Plot bzw. ein Diagramm dar
         # Es können 1 oder 2 Kurven gleichzeitig dargestellt werden
         #
@@ -1086,6 +1063,7 @@ def tab_diagramme(lat, lon, einheiten):
         # leg1          = Bezeichnung der Gruppe 1 in der Legende
         # leg2          = Bezeichnung der Gruppe 2 in der Legende
         #
+        plt.close("all")                                # vorhandene Plots schließen
         plt.clf()
         plt.rcParams["figure.figsize"] = (7.4, 6)       # Größe des Plots
         figTemp = plt.figure()
@@ -1143,10 +1121,9 @@ def tab_diagramme(lat, lon, einheiten):
 
     # Radiobuttons für die Diagrammauswahl einrichten + platzieren
     for x in range(0, len(rbp)):
-        Radiobutton(f3, text=rbp[x][0], value=rbp[x][1], indicatoron=0,
-                    font=(font_name, size), width=rbp[x][2], height=1,
-                    variable=diagram_type, command=diagram_wahl)\
-                    .place(x=rbp[x][3], y=rbp[x][4])
+        Radiobutton(f3, text=rbp[x][0], value=rbp[x][1], indicatoron=0, font=(font_name, size),
+                    width=rbp[x][2], height=1, variable=diagram_type,
+                    command=diagram_wahl).place(x=rbp[x][3], y=rbp[x][4])
     diagram_type.set("niederschlag")
     diagram_wahl()
     return
@@ -1225,8 +1202,7 @@ default_font = tkFont.nametofont("TkDefaultFont")
 default_font.configure(family=font_name, size=font_size)
 
 # Logo anzeigen
-lab_kopf = tk.Label(gui_wetter, image=logo, borderwidth=2,
-                    relief='groove', bg=col_lab_kopf)
+lab_kopf = tk.Label(gui_wetter, image=logo, borderwidth=2, relief='groove', bg=col_lab_kopf)
 # Ortsnamen holen und verkürzen
 # ort = dateien('r', '', 'orte')              # Ortsdaten aus Datei 'orte.json' holen
 ort = orte['name']  # beschränken auf den Ortsnamen
@@ -1236,8 +1212,7 @@ for x in range(0, 3):
 ort = ort[:ort_index - 1]  # Verkürzen des Ortsnamens für Überschrift
 
 # Überschriften ausgeben
-lab_kopf_1 = tk.Label(gui_wetter, text="Wettervorhersage", font=(font_name, 18,
-                                                                 font_wb),
+lab_kopf_1 = tk.Label(gui_wetter, text="Wettervorhersage", font=(font_name, 18, font_wb),
                       bg=col_lab_kopf123, fg=col_text_kopf123)
 lab_kopf_2 = tk.Label(gui_wetter, text=ort, font=(font_name, 14, font_wb),
                       bg=col_lab_kopf123, fg=col_text_kopf123)
