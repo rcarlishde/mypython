@@ -392,6 +392,11 @@ def get_Wetterdaten(lat, lon, typ="onecall"):
           str(lat) + "&lon=" \
           + str(lon) + "&lang=de&exclude=minutely,hourly" \
                        "&appid=e9795e0ea062e5a6b848c34b35313cb8"
+    # URL für onecall_all
+    urlall = "https://api.openweathermap.org/data/2.5/onecall?lat=" + \
+          str(lat) + "&lon=" \
+          + str(lon) + "&lang=de&appid=e9795e0ea062e5a6b848c34b35313cb8"
+
     # URL für forecast
     url53 = "https://api.openweathermap.org/data/2.5/forecast?lat=" + \
             str(lat) + "&lon=" + \
@@ -404,6 +409,8 @@ def get_Wetterdaten(lat, lon, typ="onecall"):
     # Daten lesen
     if typ == "onecall":
         r = requests.get(url)
+    elif typ == "onecall_all":
+        r = requests.get(urlall)
     else:
         r = requests.get(url53)
     daten = r.json()
@@ -838,7 +845,9 @@ def tab_diagramme(lat, lon, einheiten):
         index = []                              # Steuerung der Datenbeschaffung aus dem Web
 
         wahl = diagram_type.get()               # Auswahlstring lesen
-        nsdaten = daten_lesen(lat, lon)         # Webdaten lesen
+        #nsdaten = daten_lesen(lat, lon)         # Webdaten lesen
+        nsdaten = get_Wetterdaten(lat, lon, 'onecall_all')
+        fsdaten = get_Wetterdaten(lat, lon, 'forecast')
         xWerte_ticks = []   # ?????????????????????????????
 
         # Datum und Startzeit der Grafen ermitteln
@@ -868,6 +877,36 @@ def tab_diagramme(lat, lon, einheiten):
             datenliste = nsdaten['hourly']
             index = ['temp', 'temp']
             datenstatus = 3
+
+        # Plot von Temperaturen der nächsten Woche
+        elif wahl == "temp5":
+            titel = "Temperaturen der nächsten Woche (" + monat + ")"
+            ytitel = "Temperaturen in "
+            xtitel = "Tage"
+            datenliste = nsdaten['daily']
+            index = ['temp', 'temp', 'day']
+            datenstatus = 4
+
+        # Plot von Temperaturen der nächsten Woche
+        elif wahl == "temp3h":
+            titel = "Temperaturen der nächsten Woche (" + monat + ")"
+            ytitel = "Temperaturen in "
+            xtitel = "Stunden"
+            datenliste = fsdaten['list']
+            index = ['temp', 'main', 'temp']
+            datenstatus = 5
+
+
+
+
+
+
+
+
+
+
+
+
 
         # Plot von gefühlten Temperaturen der nächsten 48h
         elif wahl == 'gtemp48':
@@ -928,15 +967,6 @@ def tab_diagramme(lat, lon, einheiten):
                     yWerte2.append(0)                   # Nein, Werte auf 0 stellen
                 xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 1
-
-        # Plot von Temperaturen der nächsten Woche
-        elif wahl == "temp5":
-            titel = "Temperaturen der nächsten Woche (" + monat + ")"
-            ytitel = "Temperaturen in "
-            xtitel = "Tage"
-            datenliste = nsdaten['daily']
-            index = ['temp', 'temp', 'day']
-            datenstatus = 4
 
         # Plot von gefühlten Temperaturen der nächsten Woche
         elif wahl == "gtemp5":
@@ -1073,6 +1103,20 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)
                 zaehler += 1
 
+        # Beide yWerte mit Umrechnung - beide mit Doppelindex
+        elif datenstatus == 5:
+            for wert in datenliste:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]],
+                                            einheiten[index[0]], True))
+                if len(index) > 3:
+                    yWerte2.append(umrechnen_temp(wert[index[3]][index[4]],
+                                    einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                zaehler += 3
+
+
+
+
         diagramm_show(titel, xtitel, ytitel + einh, xWerte,
                       xWerte_ticks, yWerte, leg[0], yWerte2, leg[1])
         return
@@ -1131,29 +1175,39 @@ def tab_diagramme(lat, lon, einheiten):
     yzeile0 = 630           # y-Position der Überschrift
     yzeile1 = 665           # y-Position der Zeile 1 der RBs
     yzeile2 = 695           # y-Position der Zeile 2 der RBs
+    yzeile3 = 725           # y-Position der Zeile 3 der RBs
     tk.Label(f3, text="Intervalle:", font=(font_name, 12, 'bold'),
              width=width).place(x=0, y=yzeile0)
     tk.Label(f3, text="48 Stunden:", font=(font_name, size),
              width=width, anchor=E).place(x=10, y=yzeile1)
     tk.Label(f3, text="1 Woche:", font=(font_name, size), width=width,
              anchor=E).place(x=10, y=yzeile2)
+    tk.Label(f3, text="5 Tage/3h:", font=(font_name, size), width=width,
+             anchor=E).place(x=10, y=yzeile3)
 
     # Liste der Radiobutton-Parameter
     # rbp = [text, value(wahl), width, x-koord, y-koord]
-    rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, 725],
+    rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, yzeile0],
            ["Temperatur", "temp48", 11, 110, yzeile1],
            ["Temperatur", "temp5", 11, 110, yzeile2],
+           ["Temperatur", 'temp3h', 11, 110, yzeile3],
            ["gef. Temp.", "gtemp48", 11, 203, yzeile1],
            ["gef. Temp.", "gtemp5", 11, 203, yzeile2],
+           ["gef. Temp.", "gtemp3h", 11, 203, yzeile3],
            ["min-max Temp.", "mmtemp5", 14, 296, yzeile2],
+           ["min-max Temp.", "mmtemp3h", 14, 296, yzeile3],
            ["Luftdruck", "luft48", 10, 413, yzeile1],
            ["Luftdruck", "luft5", 10, 413, yzeile2],
+           ["Luftdruck", "luft3h", 10, 413, yzeile3],
            ["Luftfeuchte", "luftf48", 11, 498, yzeile1],
            ["Luftfeuchte", "luftf5", 11, 498, yzeile2],
+           ["Luftfeuchte", "luftf3h", 11, 498, yzeile3],
            ["Wind", "wind48", 6, 591, yzeile1],
            ["Wind", "wind5", 6, 591, yzeile2],
+           ["Wind", "wind3h", 6, 591, yzeile3],
            ["Niederschlag", "nieder48", 13, 645, yzeile1],
-           ["Niederschlag", "nieder5", 13, 645, yzeile2]]
+           ["Niederschlag", "nieder5", 13, 645, yzeile2],
+           ["Niederschlag", "nieder3h", 13, 645, yzeile3]]
 
     # Radiobuttons für die Diagrammauswahl einrichten + platzieren
     for x in range(0, len(rbp)):
