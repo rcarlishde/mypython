@@ -3,7 +3,7 @@
 ********************************
 * Dateiname: einstellungen.py  *
 *   Version: 2.2               *
-*     Stand: 03.08.2021        *
+*     Stand: 04.08.2021        *
 *     Autor: Richard Carl      *
 ********************************
 
@@ -839,7 +839,7 @@ def tab_diagramme(lat, lon, einheiten):
 
         wahl = diagram_type.get()               # Auswahlstring lesen
         nsdaten = daten_lesen(lat, lon)         # Webdaten lesen
-        xWerte_ticks = [] # ?????????????????????????????
+        xWerte_ticks = []   # ?????????????????????????????
 
         # Datum und Startzeit der Grafen ermitteln
         zeit_h = datetime.datetime.fromtimestamp(nsdaten['hourly'][0]['dt'])
@@ -867,7 +867,7 @@ def tab_diagramme(lat, lon, einheiten):
             xtitel = "Stunden"
             datenliste = nsdaten['hourly']
             index = ['temp', 'temp']
-            datenstatus = 1
+            datenstatus = 3
 
         # Plot von gefühlten Temperaturen der nächsten 48h
         elif wahl == 'gtemp48':
@@ -876,7 +876,7 @@ def tab_diagramme(lat, lon, einheiten):
             xtitel = "Stunden"
             datenliste = nsdaten['hourly']
             index = ['temp', 'feels_like']
-            datenstatus = 1
+            datenstatus = 3
 
         # Plot vom Luftdruck der nächsten 48h
         elif wahl == "luft48":
@@ -885,7 +885,7 @@ def tab_diagramme(lat, lon, einheiten):
             xtitel = "Stunden"
             datenliste = nsdaten['hourly']
             index = ['druck', 'pressure']
-            datenstatus = 1
+            datenstatus = 2
 
         # Plot von Luftfeuchte der nächsten 48h
         elif wahl == "luftf48":
@@ -894,7 +894,7 @@ def tab_diagramme(lat, lon, einheiten):
             xtitel = "Stunden"
             datenliste = nsdaten['hourly']
             index = ['feuchte', 'humidity']
-            datenstatus = 1
+            datenstatus = 2
 
         # Plot der Windstärke der nächsten 48h
         elif wahl == "wind48":
@@ -1045,12 +1045,12 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)
                 zaehler += 1
 
-        # Beide yWerte ohne Umrechnung - mit Doppelindex yWerte, einfachem Index yWerte2
-        elif datenstatus == 3:
+        # Beide yWerte mit Umrechnung der Werte - beide mit einfachem Index, ohne xWerte_ticks
+        if datenstatus == 3:
             for wert in datenliste:
-                yWerte.append(wert[index[1]][index[2]])
+                yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
                 if len(index) > 3:
-                    yWerte2.append(wert[index[3]])
+                    yWerte2.append(umrechnen_temp(wert[index[3]], einheiten[index[0]], True))
                 xWerte.append(zaehler)
                 zaehler += 1
 
@@ -1095,6 +1095,7 @@ def tab_diagramme(lat, lon, einheiten):
         # Neuen Plot aufbauen
         plt.close("all")                                # vorhandene Plots schließen
         plt.rcParams["figure.figsize"] = (7.4, 6)       # Größe des Plots
+        plt.rcParams['axes.facecolor'] = 'linen'        # Hintergrundfarbe der Diagramme
         figTemp = plt.figure()
         canvas = FigureCanvasTkAgg(figTemp, master=f3)  # TAB Diagramme auswählen
         canvas.get_tk_widget().place(x=15, y=20)        # Position des Plots im TAB
@@ -1116,6 +1117,7 @@ def tab_diagramme(lat, lon, einheiten):
             if len(yWerte1) != 0 and len(yWerte2) != 0:   # Legende nur bei 2 Grafen
                 plt.legend(loc='best')          # Position der Legende autom. festlegen
 
+        print("Länge der xticks = ", len(xWerte_ticks))
         if len(xWerte_ticks) != 0:
             plt.xticks(xWerte, xWerte_ticks) # ????????????????????????????
 
