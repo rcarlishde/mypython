@@ -21,13 +21,14 @@ Die Icons stammen ebenfalls von dort (liegen als png-Dateien vor: /images/)
 
 # Imports
 # #######
-import tkinter as tk  # GUI starten
+import tkinter as tk            # GUI starten
 from tkinter import *
 from tkinter import messagebox  # MessageBoxen
-import tkinter.ttk as ttk  # Tabs für die GUI
-import tkinter.font as tkFont  # Schriften selbst definieren
-import requests  # ermöglicht das Einlesen von Daten via API
-import datetime  # Datums- und Zeitberechnung
+import tkinter.ttk as ttk       # Tabs für die GUI
+import tkinter.font as tkFont   # Schriften selbst definieren
+import requests                 # ermöglicht das Einlesen von Daten via API
+import datetime                 # Datums- und Zeitberechnung
+import calendar                 # Kalender
 # from datetime import time
 # import json                     # Daten im Format JSON verarbeiten
 import matplotlib.pyplot as plt
@@ -838,15 +839,16 @@ def tab_diagramme(lat, lon, einheiten):
 
         wahl = diagram_type.get()               # Auswahlstring lesen
         nsdaten = daten_lesen(lat, lon)         # Webdaten lesen
+        xWerte_ticks = [] # ?????????????????????????????
 
-
-        # Startzeit des Grafen ermitteln
+        # Datum und Startzeit der Grafen ermitteln
         zeit_h = datetime.datetime.fromtimestamp(nsdaten['hourly'][0]['dt'])
         # falls Minuten kleiner 10 eine führende 0 hinzufügen
         if zeit_h.minute < 10:
             zeit = str(zeit_h.hour) + ":0" + str(zeit_h.minute)
         else:
             zeit = str(zeit_h.hour) + ":" + str(zeit_h.minute)
+        monat = akt_monat('l')                  # akt. Monat bestimmen
 
         # Plot von Niederschlag in der nächsten Stunde
         if wahl == "niederschlag":
@@ -929,12 +931,12 @@ def tab_diagramme(lat, lon, einheiten):
 
         # Plot von Temperaturen der nächsten Woche
         elif wahl == "temp5":
-            titel = "Temperaturen der nächsten Woche"
+            titel = "Temperaturen der nächsten Woche (" + monat + ")"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
             datenliste = nsdaten['daily']
             index = ['temp', 'temp', 'day']
-            datenstatus = 3
+            datenstatus = 4
 
         # Plot von gefühlten Temperaturen der nächsten Woche
         elif wahl == "gtemp5":
@@ -943,7 +945,7 @@ def tab_diagramme(lat, lon, einheiten):
             xtitel = "Tage"
             datenliste = nsdaten['daily']
             index = ['temp', 'feels_like', 'day']
-            datenstatus = 3
+            datenstatus = 4
 
         # Plot von min-max Temperaturen der nächsten Woche
         elif wahl == "mmtemp5":
@@ -1001,6 +1003,14 @@ def tab_diagramme(lat, lon, einheiten):
                     yWerte2.append(wert['snow'])        # Ja, Daten lesen
                 else:
                     yWerte2.append(0)                   # Nein, Werte auf 0 stellen
+
+                # Für die x-Achse Monatswechsel berücksichtigen
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1]         # nach Monatsende zurück auf den 1.
+                xWerte_ticks.append(zaehler_x)
+
                 xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 1
 
@@ -1015,6 +1025,14 @@ def tab_diagramme(lat, lon, einheiten):
                 yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
                 if len(index) > 3:
                     yWerte2.append(umrechnen_temp(wert[index[3]], einheiten[index[0]], True))
+
+                # Für die x-Achse Monatswechsel berücksichtigen
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1] # nach Monatsende zurück auf den 1.
+                xWerte_ticks.append(zaehler_x)
+
                 xWerte.append(zaehler)
                 zaehler += 1
 
@@ -1044,13 +1062,22 @@ def tab_diagramme(lat, lon, einheiten):
                 if len(index) > 3:
                     yWerte2.append(umrechnen_temp(wert[index[3]][index[4]],
                                     einheiten[index[0]], True))
+
+                # Für die x-Achse Monatswechsel berücksichtigen
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1] # nach Monatsende zurück auf den 1.
+                xWerte_ticks.append(zaehler_x)
+
                 xWerte.append(zaehler)
                 zaehler += 1
 
-        diagramm_show(titel, xtitel, ytitel + einh, xWerte, yWerte, leg[0], yWerte2, leg[1])
+        diagramm_show(titel, xtitel, ytitel + einh, xWerte,
+                      xWerte_ticks, yWerte, leg[0], yWerte2, leg[1])
         return
 
-    def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte,
+    def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte, xWerte_ticks=None,
                       yWerte1=None, leg1="", yWerte2=None, leg2=''):
         # Stellt einen Plot bzw. ein Diagramm dar
         # Es können 1 oder 2 Kurven gleichzeitig dargestellt werden
@@ -1088,6 +1115,10 @@ def tab_diagramme(lat, lon, einheiten):
                 plt.plot(xWerte, yWerte2, color='m', linestyle='--', marker='.', label=leg2)
             if len(yWerte1) != 0 and len(yWerte2) != 0:   # Legende nur bei 2 Grafen
                 plt.legend(loc='best')          # Position der Legende autom. festlegen
+
+        if len(xWerte_ticks) != 0:
+            plt.xticks(xWerte, xWerte_ticks) # ????????????????????????????
+
         return
 
     # Radiobutton für die Diagrammauswahl einrichten
