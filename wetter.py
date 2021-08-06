@@ -216,7 +216,8 @@ def umrechnen_wind(wind, unitWind):
             wind = '11 (orkanartiger Sturm)'
         elif wind >= 32.7:
             wind = '12 (Orkan)'
-    return str(wind) + " " + unitWind
+
+    return str(wind) + "   " + unitWind
 
 
 def umrechnen_windrichtung(winkel):
@@ -864,86 +865,267 @@ def tab_diagramme(lat, lon, einheiten):
             titel = "Niederschlag in der nächsten Stunde   (Start um " + zeit + " Uhr)"
             ytitel = "Niederschläge in "
             xtitel = "Minuten"
-            datenliste = nsdaten['minutely']
             index = ['regen', 'precipitation']
+            zaehler = 0
+            for wert in nsdaten['minutely']:
+                yWerte.append(wert[index[1]])
+                xWerte.append(zaehler)
+                zaehler += 1
             leg = ['h', '']
-            datenstatus = 2
+            datenstatus = 0
 
-        # Plot von Temperaturen der nächsten 48h
+        # Radiobuttons: Temperaturen der nächsten 48h
+        # ...........................................
         elif wahl == "temp48":
             titel = "Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
-            datenliste = nsdaten['hourly']
             index = ['temp', 'temp']
-            datenstatus = 3
+            zaehler = 0
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
 
-        # Plot von Temperaturen der nächsten Woche
-        elif wahl == "temp5":
+        elif wahl == "tempw":
             titel = "Temperaturen der nächsten Woche (" + monat + ")"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
-            datenliste = nsdaten['daily']
             index = ['temp', 'temp', 'day']
-            datenstatus = 4
+            zaehler = 0
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]], einheiten[index[0]], True))
+                # Für die x-Achse Monatswechsel berücksichtigen
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1] # nach Monatsende zurück auf den 1.
+                xWerte_ticks.append(zaehler_x)
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
 
-        # Plot von Temperaturen der nächsten Woche
-        elif wahl == "temp3h":
+        elif wahl == "temp53":
             titel = "Temperaturen der nächsten Woche (" + monat + ")"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
-            datenliste = fsdaten['list']
             index = ['temp', 'main', 'temp']
-            datenstatus = 5
+            zaehler = 0
+            for wert in fsdaten['list']:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]], einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                if wert['dt_txt'][-8:-6] == '00':
+                    xWerte_ticks.append(zaehler)
+                else:
+                    xWerte_ticks.append('.')
+                zaehler += 3
+            datenstatus = 0
 
-
-
-
-
-
-
-
-
-
-
-
-
-        # Plot von gefühlten Temperaturen der nächsten 48h
-        elif wahl == 'gtemp48':
+        # Radiobuttons: gefühlte Temperaturen der nächsten 48h
+        # ....................................................
+        elif wahl == "gtemp48":
             titel = "Gefühlte Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
-            datenliste = nsdaten['hourly']
             index = ['temp', 'feels_like']
-            datenstatus = 3
+            zaehler = 0
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
 
-        # Plot vom Luftdruck der nächsten 48h
+        elif wahl == "gtempw":
+            titel = "Gefühlte Temperaturen der nächsten Woche (" + monat + ")"
+            ytitel = "Temperaturen in "
+            xtitel = "Tage"
+            index = ['temp', 'feels_like', 'day']
+            zaehler = 0
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]], einheiten[index[0]], True))
+                # Für die x-Achse Monatswechsel berücksichtigen
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1] # nach Monatsende zurück auf den 1.
+                xWerte_ticks.append(zaehler_x)
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
+
+        elif wahl == "gtemp53":
+            titel = "Gefühlte Temperaturen der nächsten Woche (" + monat + ")"
+            ytitel = "Temperaturen in "
+            xtitel = "Stunden"
+            index = ['temp', 'main', 'feels_like']
+            zaehler = 0
+            for wert in fsdaten['list']:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]], einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                if wert['dt_txt'][-8:-6] == '00':
+                    xWerte_ticks.append(zaehler)
+                else:
+                    xWerte_ticks.append('.')
+                zaehler += 3
+            datenstatus = 0
+
+        # Radiobuttons: Min-Max Temperaturen der nächsten Woche
+        # .....................................................
+        elif wahl == "mmtempw":
+            titel = "Min-Max Temperaturen der nächsten Woche"
+            ytitel = "Temperaturen in "
+            xtitel = "Tage"
+            index = ['temp', 'temp', 'min', 'temp', 'max']
+            leg = ['min. Temp.', 'max. Temp']
+            zaehler = 0
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]], einheiten[index[0]], True))
+                yWerte2.append(umrechnen_temp(wert[index[3]][index[4]], einheiten[index[0]], True))
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1]
+                xWerte_ticks.append(zaehler_x)
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
+
+        elif wahl == "mmtemp53":
+            titel = "Min-Max Temperaturen der nächsten Woche"
+            ytitel = "Temperaturen in "
+            xtitel = "Tage"
+            index = ['temp', 'main', 'temp_min', 'main', 'temp_max']
+            leg = ['min. Temp.', 'max. Temp']
+            zaehler = 0
+            for wert in fsdaten['list']:
+                yWerte.append(umrechnen_temp(wert[index[1]][index[2]], einheiten[index[0]], True))
+                yWerte2.append(umrechnen_temp(wert[index[3]][index[4]], einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                if wert['dt_txt'][-8:-6] == '00':
+                    xWerte_ticks.append(zaehler)
+                else:
+                    xWerte_ticks.append('.')
+                zaehler += 3
+            datenstatus = 0
+
+        # Radiobuttons: Luftdruck der nächsten 48h
+        # ........................................
         elif wahl == "luft48":
             titel = "Luftdruck während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Luftdruck in "
             xtitel = "Stunden"
             datenliste = nsdaten['hourly']
             index = ['druck', 'pressure']
-            datenstatus = 2
+            zaehler = 0
+            for wert in nsdaten['hourly']:
+                yWerte.append(umrechnen_druck(wert[index[1]], einheiten[index[0]], True))
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
 
-        # Plot von Luftfeuchte der nächsten 48h
+        elif wahl == "luftw":
+            titel = "Luftdruck während der nächsten Woche (" + monat + ")"
+            ytitel = "Luftdruck in "
+            xtitel = "Stunden"
+            datenliste = nsdaten['daily']
+            index = ['druck', 'pressure']
+            zaehler = 0
+            for wert in nsdaten['daily']:
+                yWerte.append(umrechnen_druck(wert[index[1]], einheiten[index[0]], True))
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1]
+                xWerte_ticks.append(zaehler_x)
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
+
+        elif wahl == "luft53":
+            titel = "Luftdruck in  der nächsten Woche (" + monat + ")"
+            ytitel = "Luftdruck in "
+            xtitel = "Stunden"
+            index = ['druck', 'main', 'pressure']
+            zaehler = 0
+            for wert in fsdaten['list']:
+                yWerte.append(umrechnen_druck(wert[index[1]][index[2]], einheiten[index[0]], True))
+                if wert['dt_txt'][-8:-6] == '00':
+                    xWerte_ticks.append(zaehler)
+                else:
+                    xWerte_ticks.append('.')
+                xWerte.append(zaehler)
+                zaehler += 3
+            datenstatus = 0
+
+        # Radiobuttons: Luftfeuchte der nächsten 48h
+        # ..........................................
         elif wahl == "luftf48":
             titel = "Luftfeuchte während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Luftfeuchte in "
             xtitel = "Stunden"
-            datenliste = nsdaten['hourly']
             index = ['feuchte', 'humidity']
-            datenstatus = 2
+            zaehler = 0
+            for wert in nsdaten['hourly']:
+                yWerte.append(wert[index[1]])
+                xWerte.append(zaehler)
+                zaehler += 1
+            datenstatus = 0
 
-        # Plot der Windstärke der nächsten 48h
+        elif wahl == "luftfw":
+            titel = "Luftfeuchte während der nächsten Woche"
+            ytitel = "Luftfeuchte in "
+            xtitel = "Tage"
+            index = ['feuchte', 'humidity']
+            zaehler = 0
+            for wert in nsdaten['daily']:
+                yWerte.append(wert[index[1]])
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1]
+                xWerte_ticks.append(zaehler_x)
+                xWerte.append(zaehler)
+                zaehler += 1
+            print("Luftfeuchte=", nsdaten['daily'])
+            datenstatus = 0
+
+        elif wahl == "luftf53":
+            titel = "Luftfeuchte in  der nächsten Woche (" + monat + ")"
+            ytitel = "Luftfeuchte in "
+            xtitel = "Stunden"
+            index = ['feuchte', 'main', 'humidity']
+            zaehler = 0
+            for wert in fsdaten['list']:
+                yWerte.append(umrechnen_druck(wert[index[1]][index[2]], einheiten[index[0]], True))
+                if wert['dt_txt'][-8:-6] == '00':
+                    xWerte_ticks.append(zaehler)
+                else:
+                    xWerte_ticks.append('.')
+                xWerte.append(zaehler)
+                zaehler += 3
+            datenstatus = 0
+
+        # Radiobuttons: Windstärke der nächsten 48h
+        # .........................................
         elif wahl == "wind48":
             titel = "Windstärke während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Windstärke in "
             xtitel = "Stunden"
-            datenliste = nsdaten['hourly']
-            index = ['speed', 'wind_speed', '', 'wind_gust']
+            index = ['speed', 'wind_speed', 'wind_gust']
             leg = ['Windstärke', 'Windböen']
-            datenstatus = 2
+            zaehler = 0
+            for wert in nsdaten['hourly']:
+                #x = umrechnen_wind(wert[index[1]], einheiten[index[0]])[:4]
+                yWerte.append(float(umrechnen_wind(wert[index[1]], einheiten[index[0]])[:4]))
+                yWerte2.append(float(umrechnen_wind(wert[index[2]], einheiten[index[0]])[:4]))
+                xWerte.append(zaehler)
+                zaehler += 3
+            datenstatus = 0
+
+
+
+
 
          # Plot der Niederschläge der nächsten 48h
         elif wahl == "nieder48":
@@ -968,42 +1150,11 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 1
 
-        # Plot von gefühlten Temperaturen der nächsten Woche
-        elif wahl == "gtemp5":
-            titel = "Gefühlte Temperaturen der nächsten Woche"
-            ytitel = "Temperaturen in "
-            xtitel = "Tage"
-            datenliste = nsdaten['daily']
-            index = ['temp', 'feels_like', 'day']
-            datenstatus = 4
 
-        # Plot von min-max Temperaturen der nächsten Woche
-        elif wahl == "mmtemp5":
-            titel = "Min-Max Temperaturen der nächsten Woche"
-            ytitel = "Temperaturen in "
-            xtitel = "Tage"
-            datenliste = nsdaten['daily']
-            index = ['temp', 'temp', 'min', 'temp', 'max']
-            leg = ['min. Temp.', 'max. Temp']
-            datenstatus = 4
 
-        # Plot des Luftdrucks der nächsten Woche
-        elif wahl == "luft5":
-            titel = "Luftdruck während der nächsten Woche"
-            ytitel = "Luftdruck in "
-            xtitel = "Tage"
-            datenliste = nsdaten['daily']
-            index = ['druck', 'pressure']
-            datenstatus = 1
 
         # Plot der Luftfeuchte der nächsten Woche
-        elif wahl == "luftf5":
-            titel = "Luftfeuchte während der nächsten Woche"
-            ytitel = "Luftfeuchte in "
-            xtitel = "Tage"
-            datenliste = nsdaten['daily']
-            index = ['feuchte', 'humidity']
-            datenstatus = 1
+
 
         # Plot der Windstärke der nächsten Woche
         elif wahl == "wind5":
@@ -1013,7 +1164,7 @@ def tab_diagramme(lat, lon, einheiten):
             datenliste = nsdaten['daily']
             index = ['speed', 'wind_speed', 'wind_gust']
             leg = ['Windstärke', 'Windböen']
-            datenstatus = 1
+            datenstatus = 4
 
         # Plot der Niederschläge der nächsten Woche
         elif wahl == "nieder5":
@@ -1076,7 +1227,7 @@ def tab_diagramme(lat, lon, einheiten):
                 zaehler += 1
 
         # Beide yWerte mit Umrechnung der Werte - beide mit einfachem Index, ohne xWerte_ticks
-        if datenstatus == 3:
+        elif datenstatus == 3:
             for wert in datenliste:
                 yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
                 if len(index) > 3:
@@ -1117,8 +1268,8 @@ def tab_diagramme(lat, lon, einheiten):
 
 
 
-        diagramm_show(titel, xtitel, ytitel + einh, xWerte,
-                      xWerte_ticks, yWerte, leg[0], yWerte2, leg[1])
+        diagramm_show(titel, xtitel, ytitel + einh, xWerte, xWerte_ticks,
+                      yWerte, leg[0], yWerte2, leg[1])
         return
 
     def diagramm_show(text_Titel, text_xAchse, text_yAchse, xWerte, xWerte_ticks=None,
@@ -1189,19 +1340,19 @@ def tab_diagramme(lat, lon, einheiten):
     # rbp = [text, value(wahl), width, x-koord, y-koord]
     rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, yzeile0],
            ["Temperatur", "temp48", 11, 110, yzeile1],
-           ["Temperatur", "temp5", 11, 110, yzeile2],
-           ["Temperatur", 'temp3h', 11, 110, yzeile3],
+           ["Temperatur", "tempw", 11, 110, yzeile2],
+           ["Temperatur", 'temp53', 11, 110, yzeile3],
            ["gef. Temp.", "gtemp48", 11, 203, yzeile1],
-           ["gef. Temp.", "gtemp5", 11, 203, yzeile2],
-           ["gef. Temp.", "gtemp3h", 11, 203, yzeile3],
-           ["min-max Temp.", "mmtemp5", 14, 296, yzeile2],
-           ["min-max Temp.", "mmtemp3h", 14, 296, yzeile3],
+           ["gef. Temp.", "gtempw", 11, 203, yzeile2],
+           ["gef. Temp.", "gtemp53", 11, 203, yzeile3],
+           ["min-max Temp.", "mmtempw", 14, 296, yzeile2],
+           ["min-max Temp.", "mmtemp53", 14, 296, yzeile3],
            ["Luftdruck", "luft48", 10, 413, yzeile1],
-           ["Luftdruck", "luft5", 10, 413, yzeile2],
-           ["Luftdruck", "luft3h", 10, 413, yzeile3],
+           ["Luftdruck", "luftw", 10, 413, yzeile2],
+           ["Luftdruck", "luft53", 10, 413, yzeile3],
            ["Luftfeuchte", "luftf48", 11, 498, yzeile1],
-           ["Luftfeuchte", "luftf5", 11, 498, yzeile2],
-           ["Luftfeuchte", "luftf3h", 11, 498, yzeile3],
+           ["Luftfeuchte", "luftfw", 11, 498, yzeile2],
+           ["Luftfeuchte", "luftf53", 11, 498, yzeile3],
            ["Wind", "wind48", 6, 591, yzeile1],
            ["Wind", "wind5", 6, 591, yzeile2],
            ["Wind", "wind3h", 6, 591, yzeile3],
