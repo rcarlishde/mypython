@@ -710,7 +710,7 @@ def tab_details(dat_onecall, daten_forecast, ort, einheiten, image_path):
                                                             'moonset'], 0)) + '\n\n'
     text4 += "        Mondphase: " + str(dat_onecall['daily'][0]['moon_phase'])
 
-    text5 = "Weitere Meterologische Daten\n"
+    text5 = "Weitere Meteorologische Daten\n"
     text6 = "TEMTERATUREN: \n"
     text6 += "         Mittlere: " + umrechnen_temp(dat_onecall['current']['temp'],
                                                     einheiten['temp']) + '\n'
@@ -722,7 +722,7 @@ def tab_details(dat_onecall, daten_forecast, ort, einheiten, image_path):
         dat_onecall['daily'][0]['temp']['max'], einheiten['temp']) + '\n'
     text6 += "         Taupunkt: " + umrechnen_temp(dat_onecall['current']['dew_point'],
                                                     einheiten['temp']) + '\n\n'
-    text6 += "ATHMOSPHÄRE: \n"
+    text6 += "ATMOSPHÄRE: \n"
     text6 += "   Windgeschwind.: " + umrechnen_wind(dat_onecall['current']['wind_speed'],
                                                     einheiten['speed']) + '\n'
     text6 += "     Aus Richtung: " + umrechnen_windrichtung(
@@ -1311,6 +1311,22 @@ def tab_diagramme(lat, lon, einheiten):
     diagram_wahl()                          # Auswahl und Reaktion auf Radiobutton-Klick
     return
 
+# Den TAB "Info" füllen
+# ---------------------
+def tab_infos():
+    """Den TAB "Info" füllen"""
+    # Infotext aus Datei lesen
+    text = open("files/info_wetter.txt", 'r')
+    text_info = text.read()
+    # Scrollbar einrichten und einschalten
+    scroll = Scrollbar(f4)
+    info = Text(f4, borderwidth=2, relief="ridge", height=50, width=92)
+    # Scrollbar -> rechts außen, volle Höhe (sticky=NS)
+    scroll.grid(column=3, row=0, sticky=NS)
+    info.grid(column=2, row=0, padx=5, pady=5)
+    scroll.config(command=info.yview)
+    info.config(yscrollcommand=scroll.set)
+    info.insert(END, text_info)
 
 # Start Hauptprogramm
 # ###################
@@ -1442,6 +1458,9 @@ tab_details(dat_onecall, dat_forecast, orte, einheiten, icon_path)
 
 # TAB Diagramme füllen
 tab_diagramme(orte['lat'], orte['lon'], einheiten)
+
+# TAB Infos füllen
+tab_infos()
 
 tick()  # Uhr Ticker
 gui_wetter.mainloop()
