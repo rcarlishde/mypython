@@ -842,16 +842,15 @@ def tab_diagramme(lat, lon, einheiten):
         titel = ""                              # Diagrammtitel
         leg = ['', '']                          # Legendentexte
         einh = ""                               # Einheiten für Diagramme
-        datenliste = []                         # Teile der Webdaten (minutely, hourly, daily)
         index = []                              # Steuerung der Datenbeschaffung aus dem Web
+        xWerte_ticks = []                       # Sonderbeschriftung der x-Achse
+        wahl = diagram_type.get()               # Auswahlstring der Radiobuttons lesen
 
-        wahl = diagram_type.get()               # Auswahlstring lesen
-        #nsdaten = daten_lesen(lat, lon)         # Webdaten lesen
+        # Daten aus dem Web lesen
         nsdaten = get_Wetterdaten(lat, lon, 'onecall_all')
         fsdaten = get_Wetterdaten(lat, lon, 'forecast')
-        xWerte_ticks = []   # ?????????????????????????????
 
-        # Datum und Startzeit der Grafen ermitteln
+        # Datum, Monat und Startzeit der Grafen ermitteln
         zeit_h = datetime.datetime.fromtimestamp(nsdaten['hourly'][0]['dt'])
         # falls Minuten kleiner 10 eine führende 0 hinzufügen
         if zeit_h.minute < 10:
@@ -872,11 +871,10 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)
                 zaehler += 1
             leg = ['h', '']
-            datenstatus = 0
 
-        # Radiobuttons: Temperaturen der nächsten 48h
-        # ...........................................
-        elif wahl == "temp48":
+        # Radiobuttons: Temperaturen
+        # ..........................
+        elif wahl == "temp48":                  # 48 Stunden
             titel = "Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
@@ -886,9 +884,8 @@ def tab_diagramme(lat, lon, einheiten):
                 yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "tempw":
+        elif wahl == "tempw":                   # 1 Woche
             titel = "Temperaturen der nächsten Woche (" + monat + ")"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
@@ -904,9 +901,8 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte_ticks.append(zaehler_x)
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "temp53":
+        elif wahl == "temp53":                  # 5 Tage im 3 Sunden Abstand
             titel = "Temperaturen der nächsten Woche (" + monat + ")"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
@@ -920,11 +916,10 @@ def tab_diagramme(lat, lon, einheiten):
                 else:
                     xWerte_ticks.append('.')
                 zaehler += 3
-            datenstatus = 0
 
-        # Radiobuttons: gefühlte Temperaturen der nächsten 48h
-        # ....................................................
-        elif wahl == "gtemp48":
+        # Radiobuttons: gefühlte Temperaturen
+        # ...................................
+        elif wahl == "gtemp48":                 # 48 Stunden
             titel = "Gefühlte Temperaturen der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
@@ -934,9 +929,8 @@ def tab_diagramme(lat, lon, einheiten):
                 yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "gtempw":
+        elif wahl == "gtempw":                  # 1 Woche
             titel = "Gefühlte Temperaturen der nächsten Woche (" + monat + ")"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
@@ -952,9 +946,8 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte_ticks.append(zaehler_x)
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "gtemp53":
+        elif wahl == "gtemp53":                 # 5 Tage im 3 Sunden Abstand
             titel = "Gefühlte Temperaturen der nächsten Woche (" + monat + ")"
             ytitel = "Temperaturen in "
             xtitel = "Stunden"
@@ -968,11 +961,10 @@ def tab_diagramme(lat, lon, einheiten):
                 else:
                     xWerte_ticks.append('.')
                 zaehler += 3
-            datenstatus = 0
 
-        # Radiobuttons: Min-Max Temperaturen der nächsten Woche
-        # .....................................................
-        elif wahl == "mmtempw":
+        # Radiobuttons: Min-Max Temperaturen
+        # ..................................
+        elif wahl == "mmtempw":                 # 1 Woche
             titel = "Min-Max Temperaturen der nächsten Woche"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
@@ -989,9 +981,8 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte_ticks.append(zaehler_x)
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "mmtemp53":
+        elif wahl == "mmtemp53":                # 5 Tage im 3 Sunden Abstand
             titel = "Min-Max Temperaturen der nächsten Woche"
             ytitel = "Temperaturen in "
             xtitel = "Tage"
@@ -1007,11 +998,10 @@ def tab_diagramme(lat, lon, einheiten):
                 else:
                     xWerte_ticks.append('.')
                 zaehler += 3
-            datenstatus = 0
 
         # Radiobuttons: Luftdruck der nächsten 48h
         # ........................................
-        elif wahl == "luft48":
+        elif wahl == "luft48":                  # 48 Stunden
             titel = "Luftdruck während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Luftdruck in "
             xtitel = "Stunden"
@@ -1022,9 +1012,8 @@ def tab_diagramme(lat, lon, einheiten):
                 yWerte.append(umrechnen_druck(wert[index[1]], einheiten[index[0]], True))
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "luftw":
+        elif wahl == "luftw":                           # 1 Woche
             titel = "Luftdruck während der nächsten Woche (" + monat + ")"
             ytitel = "Luftdruck in "
             xtitel = "Stunden"
@@ -1040,9 +1029,8 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte_ticks.append(zaehler_x)
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "luft53":
+        elif wahl == "luft53":                          # 5 Tage im 3 Sunden Abstand
             titel = "Luftdruck in  der nächsten Woche (" + monat + ")"
             ytitel = "Luftdruck in "
             xtitel = "Stunden"
@@ -1056,11 +1044,10 @@ def tab_diagramme(lat, lon, einheiten):
                     xWerte_ticks.append('.')
                 xWerte.append(zaehler)
                 zaehler += 3
-            datenstatus = 0
 
-        # Radiobuttons: Luftfeuchte der nächsten 48h
-        # ..........................................
-        elif wahl == "luftf48":
+        # Radiobuttons: Luftfeuchte
+        # .........................
+        elif wahl == "luftf48":                         # 48 Stunden
             titel = "Luftfeuchte während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Luftfeuchte in "
             xtitel = "Stunden"
@@ -1070,10 +1057,9 @@ def tab_diagramme(lat, lon, einheiten):
                 yWerte.append(wert[index[1]])
                 xWerte.append(zaehler)
                 zaehler += 1
-            datenstatus = 0
 
-        elif wahl == "luftfw":
-            titel = "Luftfeuchte während der nächsten Woche"
+        elif wahl == "luftfw":                          # 1 Woche
+            titel = "Luftfeuchte während der nächsten Woche (" + monat + ")"
             ytitel = "Luftfeuchte in "
             xtitel = "Tage"
             index = ['feuchte', 'humidity']
@@ -1087,10 +1073,8 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte_ticks.append(zaehler_x)
                 xWerte.append(zaehler)
                 zaehler += 1
-            print("Luftfeuchte=", nsdaten['daily'])
-            datenstatus = 0
 
-        elif wahl == "luftf53":
+        elif wahl == "luftf53":                         # 5 Tage im 3 Sunden Abstand
             titel = "Luftfeuchte in  der nächsten Woche (" + monat + ")"
             ytitel = "Luftfeuchte in "
             xtitel = "Stunden"
@@ -1104,11 +1088,10 @@ def tab_diagramme(lat, lon, einheiten):
                     xWerte_ticks.append('.')
                 xWerte.append(zaehler)
                 zaehler += 3
-            datenstatus = 0
 
-        # Radiobuttons: Windstärke der nächsten 48h
-        # .........................................
-        elif wahl == "wind48":
+        # Radiobuttons: Windstärken
+        # .........................
+        elif wahl == "wind48":                          # 48 Stunden
             titel = "Windstärke während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Windstärke in "
             xtitel = "Stunden"
@@ -1116,26 +1099,54 @@ def tab_diagramme(lat, lon, einheiten):
             leg = ['Windstärke', 'Windböen']
             zaehler = 0
             for wert in nsdaten['hourly']:
-                #x = umrechnen_wind(wert[index[1]], einheiten[index[0]])[:4]
                 yWerte.append(float(umrechnen_wind(wert[index[1]], einheiten[index[0]])[:4]))
                 yWerte2.append(float(umrechnen_wind(wert[index[2]], einheiten[index[0]])[:4]))
                 xWerte.append(zaehler)
+                zaehler += 1
+
+        elif wahl == "windw":                           # 1 Woche
+            titel = "Windstärke während der nächsten Woche (" + monat + ")"
+            ytitel = "Windstärke in "
+            xtitel = "Tage"
+            index = ['speed', 'wind_speed', 'wind_gust']
+            leg = ['Windstärke', 'Windböen']
+            zaehler = 0
+            for wert in nsdaten['daily']:
+                yWerte.append(float(umrechnen_wind(wert[index[1]], einheiten[index[0]])[:4]))
+                yWerte2.append(float(umrechnen_wind(wert[index[2]], einheiten[index[0]])[:4]))
+                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
+                zaehler_x = zaehler + zeit_h.day
+                if zaehler_x > monat_range[1]:
+                    zaehler_x -= monat_range[1]
+                xWerte_ticks.append(zaehler_x)
+                xWerte.append(zaehler)
+                zaehler += 1
+
+        elif wahl == "wind53":                          # 5 Tage im 3 Sunden Abstand
+            titel = "Windstärke in  der nächsten Woche (" + monat + ")"
+            ytitel = "Windstärke in "
+            xtitel = "Stunden"
+            index = ['speed', 'wind', 'speed', 'gust']
+            leg = ['Windstärke', 'Windböen']
+            zaehler = 0
+            for wert in fsdaten['list']:
+                yWerte.append(umrechnen_druck(wert[index[1]][index[2]], einheiten[index[0]], True))
+                yWerte2.append(umrechnen_druck(wert[index[1]][index[3]], einheiten[index[0]], True))
+                if wert['dt_txt'][-8:-6] == '00':
+                    xWerte_ticks.append(zaehler)
+                else:
+                    xWerte_ticks.append('.')
+                xWerte.append(zaehler)
                 zaehler += 3
-            datenstatus = 0
 
-
-
-
-
-         # Plot der Niederschläge der nächsten 48h
-        elif wahl == "nieder48":
+        # Radiobuttons: Niederschläge
+        # ...........................
+        elif wahl == "nieder48":                        # 48 Stunden
             titel = "Niederschläge während der nächsten 48h (Start um " + zeit + " Uhr)"
             ytitel = "Niederschläge in "
             xtitel = "Stunden"
             index = ['regen']
             leg = ['Regen', 'Schnee']
-            # Eigene Routine zur Wertebeschaffung da geprüft wird, ob Regen oder Schnee überhaupt
-            # angegeben sind
             datenstatus = 0                             # gemeinsame Wertebeschaffung umgehen
             zaehler = 0                                 # reset Datenzähler
             for wert in nsdaten['hourly']:
@@ -1150,30 +1161,12 @@ def tab_diagramme(lat, lon, einheiten):
                 xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 1
 
-
-
-
-        # Plot der Luftfeuchte der nächsten Woche
-
-
-        # Plot der Windstärke der nächsten Woche
-        elif wahl == "wind5":
-            titel = "Windstärke während der nächsten Woche"
-            ytitel = "Windstärke in "
-            xtitel = "Stunden"
-            datenliste = nsdaten['daily']
-            index = ['speed', 'wind_speed', 'wind_gust']
-            leg = ['Windstärke', 'Windböen']
-            datenstatus = 4
-
-        # Plot der Niederschläge der nächsten Woche
-        elif wahl == "nieder5":
-            titel = "Niederschläge während der nächsten Woche"
+        elif wahl == "niederw":                         # 1 Woche
+            titel = "Niederschläge während der nächsten Woche (" + monat + ")"
             ytitel = "Niederschläge in "
             xtitel = "Tage"
             leg = ['Regen', 'Schnee']
             index = ['regen']
-            datenstatus = 0                             # gemeinsame Wertebeschaffung umgehen
             zaehler = 0                                 # reset Datenzähler
             for wert in nsdaten['daily']:
                 if 'rain' in wert:                      # Werte für Regen angegeben?
@@ -1184,90 +1177,40 @@ def tab_diagramme(lat, lon, einheiten):
                     yWerte2.append(wert['snow'])        # Ja, Daten lesen
                 else:
                     yWerte2.append(0)                   # Nein, Werte auf 0 stellen
-
                 # Für die x-Achse Monatswechsel berücksichtigen
                 monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
                 zaehler_x = zaehler + zeit_h.day
                 if zaehler_x > monat_range[1]:
                     zaehler_x -= monat_range[1]         # nach Monatsende zurück auf den 1.
                 xWerte_ticks.append(zaehler_x)
-
                 xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 1
 
-        einh = einheiten[index[0]]                      # Einheiten setzen
-
-        # Gemeinsame Routinen zur Wertebeschaffung
-        zaehler = 0
-
-        # Beide yWerte mit Umrechnung der Werte - beide mit einfachem Index
-        if datenstatus == 1:
-            for wert in datenliste:
-                yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
-                if len(index) > 3:
-                    yWerte2.append(umrechnen_temp(wert[index[3]], einheiten[index[0]], True))
-
-                # Für die x-Achse Monatswechsel berücksichtigen
-                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
-                zaehler_x = zaehler + zeit_h.day
-                if zaehler_x > monat_range[1]:
-                    zaehler_x -= monat_range[1] # nach Monatsende zurück auf den 1.
-                xWerte_ticks.append(zaehler_x)
-
-                xWerte.append(zaehler)
-                zaehler += 1
-
-        # Beide yWerte ohne Umrechnung - beide mit einfachem Index
-        elif datenstatus == 2:
-            for wert in datenliste:
-                yWerte.append(wert[index[1]])
-                if len(index) > 3:
-                    yWerte2.append(wert[index[3]])
-                xWerte.append(zaehler)
-                zaehler += 1
-
-        # Beide yWerte mit Umrechnung der Werte - beide mit einfachem Index, ohne xWerte_ticks
-        elif datenstatus == 3:
-            for wert in datenliste:
-                yWerte.append(umrechnen_temp(wert[index[1]], einheiten[index[0]], True))
-                if len(index) > 3:
-                    yWerte2.append(umrechnen_temp(wert[index[3]], einheiten[index[0]], True))
-                xWerte.append(zaehler)
-                zaehler += 1
-
-        # Beide yWerte mit Umrechnung - beide mit Doppelindex
-        elif datenstatus == 4:
-            for wert in datenliste:
-                yWerte.append(umrechnen_temp(wert[index[1]][index[2]],
-                                            einheiten[index[0]], True))
-                if len(index) > 3:
-                    yWerte2.append(umrechnen_temp(wert[index[3]][index[4]],
-                                    einheiten[index[0]], True))
-
-                # Für die x-Achse Monatswechsel berücksichtigen
-                monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
-                zaehler_x = zaehler + zeit_h.day
-                if zaehler_x > monat_range[1]:
-                    zaehler_x -= monat_range[1] # nach Monatsende zurück auf den 1.
-                xWerte_ticks.append(zaehler_x)
-
-                xWerte.append(zaehler)
-                zaehler += 1
-
-        # Beide yWerte mit Umrechnung - beide mit Doppelindex
-        elif datenstatus == 5:
-            for wert in datenliste:
-                yWerte.append(umrechnen_temp(wert[index[1]][index[2]],
-                                            einheiten[index[0]], True))
-                if len(index) > 3:
-                    yWerte2.append(umrechnen_temp(wert[index[3]][index[4]],
-                                    einheiten[index[0]], True))
-                xWerte.append(zaehler)
+        elif wahl == "nieder53":                        # 5 Tage im 3 Sunden Abstand
+            titel = "Niederschläge während der nächsten Woche (" + monat + ")"
+            ytitel = "Niederschläge in "
+            xtitel = "Stunden"
+            leg = ['Regen', 'Schnee']
+            index = ['regen']
+            zaehler = 0                                 # reset Datenzähler
+            for wert in fsdaten['list']:
+                if 'rain' in wert:                      # Werte für Regen angegeben?
+                    yWerte.append(wert['rain']['3h'])   # Ja, Daten lesen
+                else:
+                    yWerte.append(0)                    # Nein, Werte auf 0 stellen
+                if 'snow' in wert:                      # Werte für Schnee angegeben?
+                    yWerte2.append(wert['snow']['3h'])  # Ja, Daten lesen
+                else:
+                    yWerte2.append(0)                   # Nein, Werte auf 0 stellen
+                if wert['dt_txt'][-8:-6] == '00':
+                    xWerte_ticks.append(zaehler)
+                else:
+                    xWerte_ticks.append('.')
+                xWerte.append(zaehler)                  # xWerte lesen
                 zaehler += 3
 
 
-
-
+        einh = einheiten[index[0]]                      # Einheiten setzen
         diagramm_show(titel, xtitel, ytitel + einh, xWerte, xWerte_ticks,
                       yWerte, leg[0], yWerte2, leg[1])
         return
@@ -1312,7 +1255,6 @@ def tab_diagramme(lat, lon, einheiten):
             if len(yWerte1) != 0 and len(yWerte2) != 0:   # Legende nur bei 2 Grafen
                 plt.legend(loc='best')          # Position der Legende autom. festlegen
 
-        print("Länge der xticks = ", len(xWerte_ticks))
         if len(xWerte_ticks) != 0:
             plt.xticks(xWerte, xWerte_ticks) # ????????????????????????????
 
@@ -1337,7 +1279,7 @@ def tab_diagramme(lat, lon, einheiten):
              anchor=E).place(x=10, y=yzeile3)
 
     # Liste der Radiobutton-Parameter
-    # rbp = [text, value(wahl), width, x-koord, y-koord]
+    # --> rbp = [text, value(wahl), width, x-koord, y-koord]
     rbp = [["Niederschlag in der nächsten Stunde", "niederschlag", 37, 110, yzeile0],
            ["Temperatur", "temp48", 11, 110, yzeile1],
            ["Temperatur", "tempw", 11, 110, yzeile2],
@@ -1346,7 +1288,7 @@ def tab_diagramme(lat, lon, einheiten):
            ["gef. Temp.", "gtempw", 11, 203, yzeile2],
            ["gef. Temp.", "gtemp53", 11, 203, yzeile3],
            ["min-max Temp.", "mmtempw", 14, 296, yzeile2],
-           ["min-max Temp.", "mmtemp53", 14, 296, yzeile3],
+           #["min-max Temp.", "mmtemp53", 14, 296, yzeile3],
            ["Luftdruck", "luft48", 10, 413, yzeile1],
            ["Luftdruck", "luftw", 10, 413, yzeile2],
            ["Luftdruck", "luft53", 10, 413, yzeile3],
@@ -1354,11 +1296,11 @@ def tab_diagramme(lat, lon, einheiten):
            ["Luftfeuchte", "luftfw", 11, 498, yzeile2],
            ["Luftfeuchte", "luftf53", 11, 498, yzeile3],
            ["Wind", "wind48", 6, 591, yzeile1],
-           ["Wind", "wind5", 6, 591, yzeile2],
-           ["Wind", "wind3h", 6, 591, yzeile3],
+           ["Wind", "windw", 6, 591, yzeile2],
+           ["Wind", "wind53", 6, 591, yzeile3],
            ["Niederschlag", "nieder48", 13, 645, yzeile1],
-           ["Niederschlag", "nieder5", 13, 645, yzeile2],
-           ["Niederschlag", "nieder3h", 13, 645, yzeile3]]
+           ["Niederschlag", "niederw", 13, 645, yzeile2],
+           ["Niederschlag", "nieder53", 13, 645, yzeile3]]
 
     # Radiobuttons für die Diagrammauswahl einrichten + platzieren
     for x in range(0, len(rbp)):
