@@ -181,9 +181,10 @@ def umrechnen_temp(temp, unitTemp, numeral=False):
         return float(temp)
 
 
-def umrechnen_wind(wind, unitWind):
+def umrechnen_wind(wind, unitWind, numeral=False):
     # Umrechnen der Windstärke passend zu den eingestellten Einheiten
     # Basis ist m/s
+    wind1 = 0
     if unitWind == 'Windstärken 0-12':
         unitWind = ''
     if unitWind == 'km/h':
@@ -192,32 +193,47 @@ def umrechnen_wind(wind, unitWind):
     elif unitWind == '':
         if wind < 0.3:
             wind = '0 (Windstille)'
+            wind1 = 0
         elif 0.3 <= wind < 1.6:
             wind = '1 (leiser Zug)'
+            wind1 = 1
         elif 1.6 <= wind < 3.4:
             wind = '2 (leichte Brise)'
+            wind1 = 2
         elif 3.4 <= wind < 5.5:
             wind = '3 (schwache Brise)'
+            wind1 = 3
         elif 5.5 <= wind < 8.0:
             wind = '4 (mäßige Brise)'
+            wind1 = 4
         elif 8.0 <= wind < 10.8:
             wind = '5 (frische Brise)'
+            wind1 = 5
         elif 10.8 <= wind < 13.9:
             wind = '6 (starker Wind)'
+            wind1 = 6
         elif 13.9 <= wind < 17.2:
             wind = '7 (steifer Wind)'
+            wind1 = 7
         elif 17.2 <= wind < 20.8:
             wind = '8 (stürmischer Wind)'
+            wind1 = 8
         elif 20.8 <= wind < 24.5:
             wind = '9 (Sturm)'
+            wind1 = 9
         elif 24.5 <= wind < 28.5:
             wind = '10 (schwerer Sturm)'
+            wind1 = 10
         elif 28.5 <= wind < 32.7:
             wind = '11 (orkanartiger Sturm)'
+            wind1 = 11
         elif wind >= 32.7:
             wind = '12 (Orkan)'
-
-    return str(wind) + "   " + unitWind
+            wind1 = 12
+    if numeral is False:
+        return str(wind) + "   " + unitWind
+    else:
+        return wind, wind1
 
 
 def umrechnen_windrichtung(winkel):
@@ -1099,8 +1115,16 @@ def tab_diagramme(lat, lon, einheiten):
             leg = ['Windstärke', 'Windböen']
             zaehler = 0
             for wert in nsdaten['hourly']:
-                yWerte.append(float(umrechnen_wind(wert[index[1]], einheiten[index[0]])[:4]))
-                yWerte2.append(float(umrechnen_wind(wert[index[2]], einheiten[index[0]])[:4]))
+                wind, wind1 = umrechnen_wind(wert[index[1]], einheiten[index[0]], True)
+                if einheiten[index[0]] == "Windstärken 0-12":
+                    yWerte.append(wind1)
+                else:
+                    yWerte.append(float(wind))
+                wind, wind1 = umrechnen_wind(wert[index[2]], einheiten[index[0]], True)
+                if einheiten[index[0]] == "Windstärken 0-12":
+                    yWerte2.append(wind1)
+                else:
+                    yWerte2.append(float(wind))
                 xWerte.append(zaehler)
                 zaehler += 1
 
@@ -1112,8 +1136,16 @@ def tab_diagramme(lat, lon, einheiten):
             leg = ['Windstärke', 'Windböen']
             zaehler = 0
             for wert in nsdaten['daily']:
-                yWerte.append(float(umrechnen_wind(wert[index[1]], einheiten[index[0]])[:4]))
-                yWerte2.append(float(umrechnen_wind(wert[index[2]], einheiten[index[0]])[:4]))
+                wind, wind1 = umrechnen_wind(wert[index[1]], einheiten[index[0]], True)
+                if einheiten[index[0]] == "Windstärken 0-12":
+                    yWerte.append(wind1)
+                else:
+                    yWerte.append(float(wind))
+                wind, wind1 = umrechnen_wind(wert[index[2]], einheiten[index[0]], True)
+                if einheiten[index[0]] == "Windstärken 0-12":
+                    yWerte2.append(wind1)
+                else:
+                    yWerte2.append(float(wind))
                 monat_range = calendar.monthrange(zeit_h.year, zeit_h.month)
                 zaehler_x = zaehler + zeit_h.day
                 if zaehler_x > monat_range[1]:
@@ -1130,8 +1162,16 @@ def tab_diagramme(lat, lon, einheiten):
             leg = ['Windstärke', 'Windböen']
             zaehler = 0
             for wert in fsdaten['list']:
-                yWerte.append(umrechnen_druck(wert[index[1]][index[2]], einheiten[index[0]], True))
-                yWerte2.append(umrechnen_druck(wert[index[1]][index[3]], einheiten[index[0]], True))
+                wind, wind1 = umrechnen_wind(wert[index[1]][index[2]], einheiten[index[0]], True)
+                if einheiten[index[0]] == "Windstärken 0-12":
+                    yWerte.append(wind1)
+                else:
+                    yWerte.append(float(wind))
+                wind, wind1 = umrechnen_wind(wert[index[1]][index[3]], einheiten[index[0]], True)
+                if einheiten[index[0]] == "Windstärken 0-12":
+                    yWerte2.append(wind1)
+                else:
+                    yWerte2.append(float(wind))
                 if wert['dt_txt'][-8:-6] == '00':
                     xWerte_ticks.append(zaehler)
                 else:
