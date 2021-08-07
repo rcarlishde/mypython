@@ -1,0 +1,85 @@
+
+                            Wetterbericht - Infos
+                            =====================
+
+   TAB Vorhersage
+   --------------
+   Hier wird das Wetter der nächsten 5 Tage, je Zeile ein Tag, angezeigt. Für jeden Tag
+   erfolgt die Anzeige in den Spalten für:
+      "Nachts"  (3:00 Uhr),
+      "Morgens" (9:00 Uhr),
+      "Mittags" (15:00 Uhr) und
+      "Abends"  (21:00 Uhr).
+   Jedes Icons gibt das voraussichtliche Wetter des Tages wider. In der ersten Zeile
+   können Icons mit einem ? erscheinen. Dies bedeutet, der Vorhersagezeitpunkt liegt bereits
+   in der Vergangenheit. Führt man den Mauszeiger über ein Icon, öffnet sich ein Fenster
+   mit detaillierten Wetterdaten.
+
+   TAB Details
+   -----------
+   In diesem Fenster werden 3 Abschnitte mit Informationen angezeigt:
+      ORTSDATEN
+          Stadt, Staat mit Flagge,
+          Koordinaten auf der Erde,
+          Höhe über NN,
+          Einwohnerzahl und Zeitzone
+      ASTRONOMISCHE DATEN (aktueller Tag!)
+          Sonnenaufgang, Sonnenuntergang,
+          Mondaufgang, Monduntergang, Mondphase mit Grafik
+      METEOROLOGISCHE DATEN
+          Temperaturen (mittlere, gefühlte, min, max) und Taupunkt
+          Atmosphäre (Windstärke, Windrichtung, Luftdruck, Luftfeuchte ...)
+
+   TAB Diagramme
+   -------------
+   Die Diagramme zeigen Wetterdaten in Zeitintervallen an:
+      48 Stunden
+            jede Stunde ein Wert,
+            X-Achse zeigt 48h seit Datum in der Überschrift
+       1 Woche
+            7 Tage, je 1 Wert pro Tag,
+            X-Achse zeigt Datum je Tag im Monat laut Überschrift
+       5 Tage/3h
+            Für 5 Tage, alle 3h ein Wert,
+            X-Achse zeigt alle 3h einen Punkt und eine Ziffer, wenn der Tag wechselt
+   Folgende Parameter werden angezeigt:
+      Temperaturen, gefühlte Temperaturen, Min- und Max-Temperaturen
+      Luftdruck und Luftfeuchte
+      Windgeschwindigkeit, Windböen
+      Niederschläge
+
+   TAB Infos
+   ---------
+   Diese Informationen
+
+  Hinweise zu den Quellen:
+  ------------------------
+  >  Die Koordinaten des Vorhersageorts werden von OpenStreetMap geholt und verarbeitet:
+     Manuell    : https://nominatim.openstreetmap.org/ui/search.html
+     Automatisch: https://nominatim.openstreetmap.org/search/Neuss?format=json
+     Der Ort, hier "Neuss", kann durch andere Orte beliebig ersetzt werden.
+
+  >  Die Liste der Ländercodes nach ISO 3166, Alpha-2 (Stand Mai 2020) stammt aus:
+     https://stefangabos.github.io/world_countries/
+     Die Liste kann nicht automatisch aktualisiert werden. Dies muss manuell auf der
+     verlinkten Seite erfolgen. Sie muss im Format "JSON" vorliegen und sollte alle
+     Staaten enthalten ("World")
+
+  >  Die Wetterdaten stammen von OpenStreetMap:
+     https://openweathermap.org/api
+     Hier stehen mehrere Tarife zur Auswahl. Die folgenden 2 Tarife habe ich ausgesucht:
+     # ONE CALL API
+       https://api.openweathermap.org/data/2.5/onecall?lat=51.2&lon=6.68&lang=de&appid=x
+     # 5 DAY / 3 HOUR FORECAST
+       https://api.openweathermap.org/data/2.5/forecast?lat=51.2&lon=6.68&lang=de&appid=x
+     Die Angabe &appid=x muss für x einen Code enthalten, den man bei der Registrierung auf
+     der Webseite kostenlos erhalten kann. Der Zugriff innerhalb dieses Programms erfolgt
+     automatisch mit einem solchen Code.
+
+  >  Die hier verwendeten Icons stammen von:
+     Meteorologisk Institutt (Norwegen)
+     Format Json
+
+  Version: 2.2
+    Stand: 04.08.2021
+    Autor: Richard Carl

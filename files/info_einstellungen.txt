@@ -65,7 +65,7 @@
 
   >  Die hier verwendeten Icons stammen von:
      Meteorologisk Institutt (Norwegen)
-     Format Json)
+     Format Json
 
   Version: 2.2
     Stand: 22.07.2021
