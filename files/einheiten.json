@@ -1,8 +1,8 @@
 {
     "temp": "°C",
     "druck": "hPa",
-    "speed": "m/s",
-    "regen": "mm",
+    "speed": "km/h",
+    "regen": "ltr/m²",
     "hoehe": "m",
     "feuchte": "%",
     "wolken": "%",

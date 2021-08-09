@@ -1272,7 +1272,8 @@ def tab_diagramme(lat, lon, einheiten):
         #
         # Neuen Plot aufbauen
         plt.close("all")                                # vorhandene Plots schließen
-        plt.rcParams["figure.figsize"] = (7.4, 6)       # Größe des Plots
+        plt.rcParams["figure.figsize"] = (7.4, 5.6)     # Größe des Plots
+        #plt.rcParams["figure.figsize"] = (7.1, 5.5)    # Größe extern
         plt.rcParams['axes.facecolor'] = 'linen'        # Hintergrundfarbe der Diagramme
         figTemp = plt.figure()
         canvas = FigureCanvasTkAgg(figTemp, master=f3)  # TAB Diagramme auswählen
