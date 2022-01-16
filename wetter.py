@@ -1,9 +1,9 @@
 #!/usr/bin/python
 """
 ********************************
-* Dateiname: einstellungen.py  *
-*   Version: 2.2               *
-*     Stand: 04.08.2021        *
+* Dateiname: wetter.py         *
+*   Version: 2.2.1             *
+*     Stand: 16.01.2022        *
 *     Autor: Richard Carl      *
 ********************************
 
@@ -73,7 +73,7 @@ col_text_schliessen = std_text_col  # Button Schließen
 col_tooltip_txt = std_text_col  # Tooltipps
 col_ueber_txt = std_text_col  # Überschriften in Vorhersage
 col_cell_txt = std_text_col  # Texte in allen Zellen der Vorhersage
-col_alarm_txt = std_text_col  # Alarmtext
+col_alarm_txt = 'red'  # Alarmtext
 col_detail_ort_txt = std_text_col  # TAB Detail Text Ortsdaten
 col_detail_astro_txt = std_text_col  # TAB Detail Text Astrologische Daten
 col_detail_meteor_txt = std_text_col  # TAB Detail Text Meteorologische Daten
@@ -291,16 +291,17 @@ def alerts(daten_onecall):
     if 'alerts' in daten_onecall.keys():
         daten = daten_onecall['alerts']  # Alarmdaten selektieren
         # Alarmtexte zusammenstellen
-        alarm = "Alarmquelle\t\t: " + daten['sender_name'] + '\n'
+        alarm = "Alarmquelle:\t" + daten[0]['sender_name'] + '\n'
         # Timestamps für Alarmstart und -ende auf deutsches Format bringen
-        alarmstart = tstamp_to_date(daten['start'])
+        alarmstart = tstamp_to_date(daten[0]['start'])
 
-        start = alarmstart.strftime('%d%m.%Y um %H:%M Uhr\n')
-        alarmende = tstamp_to_date(daten['end'])
-        ende = alarmende.strftime('%d.%m.%Y um %H:%M Uhr\n')
-        alarm += "Start des Alarms\t\t: " + start
-        alarm += "Ende des Alarms\t\t: " + ende
-        alarm += "Meldung\t\t:" + daten['description']
+        start = alarmstart.strftime('%d.%m.%Y um %H:%M Uhr')
+        alarmende = tstamp_to_date(daten[0]['end'])
+        ende = alarmende.strftime('%d.%m.%Y um %H:%M Uhr')
+        # alarm += "Start des Alarms\t\t: " + start
+        # alarm += "Ende des Alarms\t\t: " + ende
+        alarm += "Alarmdauer :\tvon " + start + " bis " + ende + "\n"
+        alarm += "MELDUNG    :\n" + daten[0]['description']
         # Alarm-Icon anzeigen
         photo = tk.PhotoImage(file=icon_path + "Icon_Unwetter.png")
         lab_image = tk.Label(gui_wetter, image=photo,
@@ -308,15 +309,16 @@ def alerts(daten_onecall):
         lab_image.photo = photo  # Fehlerkorrektur der Grafik
         lab_image.place(x=10, y=970)
 
-        # Alarmtext ausgeben
-        lab_alert = tk.Label(gui_wetter,
-                             text=alarm,
-                             font=('Noto Sans', 11, 'italic'),
-                             height=5, width=70,
-                             bg=col_alarm, fg=col_alarm_txt)
-        lab_alert['padx'] = 10
-        lab_alert['pady'] = 10
-        lab_alert.place(x=75, y=970)
+        # Alarm ausgeben in Texfeld
+        text_alert = Text(gui_wetter,
+                          height=7, width=73,
+                          font=('Noto Sans mono', 10),
+                          bg=col_alarm,
+                          fg=col_alarm_txt,
+                          wrap="word",
+                          relief="flat")
+        text_alert.place(x=85, y=970)
+        text_alert.insert(END, alarm)
     return
 
 
@@ -330,23 +332,23 @@ def mond_phase(phase):
     # Gibt den Dateinamen der passenden Mondphase zurück
     ptext = ''
     if phase == 0:
-        phase = 1  # Anfang und Ende gleichstellen
-    if phase < 0.25:
-        ptext = "moon5.png"
-    elif phase == 0.25:
-        ptext = "moon6.png"
-    elif 0.25 < phase < 0.50:
-        ptext = "moon7.png"
-    elif phase == 0.50:
         ptext = "moon0.png"
-    elif 0.50 < phase < 0.75:
+    elif phase < 0.25:
         ptext = "moon1.png"
-    elif phase == 0.75:
+    elif phase == 0.25:
         ptext = "moon2.png"
-    elif 0.75 < phase < 1:
+    elif 0.25 < phase < 0.50:
         ptext = "moon3.png"
-    elif phase == 1:
+    elif phase == 0.50:
         ptext = "moon4.png"
+    elif 0.50 < phase < 0.75:
+        ptext = "moon5.png"
+    elif phase == 0.75:
+        ptext = "moon6.png"
+    elif 0.75 < phase < 1:
+        ptext = "moon7.png"
+    elif phase == 1:
+        ptext = "moon0.png"
     return ptext
 
 
@@ -628,7 +630,7 @@ def tab_vorhersage(daten_forecast, einheiten, image_path):
     # --------------------
     # Start-Koordinaten für Text und Bild je Feld
     x_text = 22  # Startkoordinate für x des ersten Textfeldes je Zeile
-    y_text = 23  # Startkoordinate für y des ersten Textfeld je Spalte
+    y_text = 28  # Startkoordinate für y des ersten Textfeld je Spalte
     x_logo = 80  # Startkoordinate für x des ersten Icons je Zeile
     y_logo = 30  # Startkoordinate für y des ersten Icons je Spalte
     x_step = 188  # Addieren je Spalte
@@ -1032,7 +1034,7 @@ def tab_diagramme(lat, lon, einheiten):
         elif wahl == "luftw":                           # 1 Woche
             titel = "Luftdruck während der nächsten Woche (" + monat + ")"
             ytitel = "Luftdruck in "
-            xtitel = "Stunden"
+            xtitel = "Tage"
             datenliste = nsdaten['daily']
             index = ['druck', 'pressure']
             zaehler = 0
